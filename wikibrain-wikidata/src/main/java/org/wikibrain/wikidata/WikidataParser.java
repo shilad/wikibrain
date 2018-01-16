@@ -156,7 +156,7 @@ public class WikidataParser {
                 if (value.getEntityType().equals(EntityIdValue.ET_ITEM)) {
                     return WikidataValue.forItem(Integer.valueOf(value.getId().substring(1)));
                 } else if (value.getEntityType().equals(EntityIdValue.ET_PROPERTY)) {
-                    throw new IllegalArgumentException("Did not expect entity property");
+                    return WikidataValue.forProperty(Integer.valueOf(value.getId().substring(1)));
                 } else {
                     throw new IllegalArgumentException("Unknown entity type: " + value.getEntityType());
                 }

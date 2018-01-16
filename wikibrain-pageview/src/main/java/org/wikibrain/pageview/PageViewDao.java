@@ -14,6 +14,7 @@ import org.wikibrain.core.lang.LocalId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 /**
  * @author Shilad Sen
@@ -79,6 +80,13 @@ public interface PageViewDao extends Dao<PageView> {
      * @throws DaoException
      */
     public Map<Integer, Integer> getNumViews(Language lang, Iterable<Integer> ids, ArrayList<DateTime[]> dates) throws ConfigurationException, DaoException;
+
+    /**
+     * Returns the hours that have been loaded for each language.
+     * @return
+     * @throws DaoException
+     */
+    Map<Language, SortedSet<DateTime>> getLoadedHours() throws DaoException;
 
     /**
      * Ensure the pageviews for the specified languages and time interval are loaded.

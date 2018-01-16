@@ -37,6 +37,7 @@ public class FileDownloader {
 
 
     public FileDownloader() {
+        RequestedLinkGetter.FIX_CERTS();
     }
 
     public File download(URL url, File file) throws InterruptedException {

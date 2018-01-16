@@ -20,17 +20,20 @@ import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.download.DumpFileDownloader;
+import org.wikibrain.download.FileDownloader;
 import org.wikibrain.download.RequestedLinkGetter;
 import org.wikibrain.mapper.ConceptMapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wikibrain.mapper.algorithms.PureWikidataConceptMapper;
 
 /**
  *
@@ -40,7 +43,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ConceptLoader {
+
     private static final Logger LOG = LoggerFactory.getLogger(ConceptLoader.class);
+    public static final String WIKIDATA_JSON_URL = "https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2";
     private final LanguageSet languageSet;
     private final UniversalPageDao dao;
     private final MetaInfoDao metaDao;
@@ -74,22 +79,13 @@ public class ConceptLoader {
     }
 
     public static void downloadWikidataLinks(Configuration conf) throws IOException, WikiBrainException, java.text.ParseException, InterruptedException {
-        List<File> paths = Env.getFiles(Language.WIKIDATA, FileMatcher.WIKIDATA_ITEMS, conf);
-        if (paths.isEmpty()) {
-            File dumpFile = File.createTempFile("wikiapidia", "items");
-            dumpFile.deleteOnExit();
-            LOG.info("downloading wikidata items file");
-            RequestedLinkGetter getter = new RequestedLinkGetter(
-                    Language.WIKIDATA,
-                    Arrays.asList(FileMatcher.WIKIDATA_ITEMS),
-                    new Date()
-            );
-            FileUtils.writeLines(dumpFile, getter.getLangLinks());
-
-            // Fetch the file (if necessary) to the standard path
-            String filePath = conf.get().getString("download.path");
-            DumpFileDownloader downloader = new DumpFileDownloader(new File(filePath));
-            downloader.downloadFrom(dumpFile);
+        File f = PureWikidataConceptMapper.getJsonLocation(conf);
+        if (!f.exists()) {
+            File tf = File.createTempFile("wikidata.json", null);
+            tf.delete();
+            FileDownloader dl = new FileDownloader();
+            dl.download(new URL(WIKIDATA_JSON_URL), tf);
+            tf.renameTo(f);
         }
     }
 

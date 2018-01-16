@@ -4,6 +4,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.typesafe.config.Config;
+import org.apache.commons.io.LineIterator;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
 import org.wikibrain.conf.ConfigurationException;
 import org.wikibrain.conf.Configurator;
@@ -19,17 +24,21 @@ import org.wikibrain.core.model.Title;
 import org.wikibrain.core.model.UniversalPage;
 import org.wikibrain.mapper.ConceptMapper;
 import org.wikibrain.mapper.MapperIterator;
-import org.wikibrain.parser.sql.MySqlDumpParser;
+import org.wikibrain.utils.ParallelForEach;
+import org.wikibrain.utils.Procedure;
+import org.wikibrain.utils.WpIOUtils;
 
-import java.io.*;
-import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
- * User: bjhecht
- * Date: 6/25/13
- * Time: 1:59 PM
+ * User: bjhecht, Shilad Sen
  */
 public class PureWikidataConceptMapper extends ConceptMapper {
 
@@ -46,69 +55,89 @@ public class PureWikidataConceptMapper extends ConceptMapper {
         return super.getId();
     }
 
+
+
     @Override
-    public Iterator<UniversalPage> getConceptMap(LanguageSet ls) throws DaoException {
+    public Iterator<UniversalPage> getConceptMap(final LanguageSet ls) throws DaoException {
+        LineIterator lines = null;
+        try {
+            lines = new LineIterator(WpIOUtils.openBufferedReader(wikiDataPath));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
         final Map<Integer, Multimap<Language, LocalId>> backend = Maps.newHashMap();
         final Map<Integer, NameSpace> nsBackend = Maps.newHashMap();
+        final ThreadLocal<JSONParser> parser = new ThreadLocal<JSONParser>();
 
-        // loop through sql dump
-        MySqlDumpParser dumpParser = new MySqlDumpParser();
-        Iterable<Object[]> lines = dumpParser.parse(wikiDataPath);
-        int lineCounter = 0; int validLineCounter = 0;
-        int[] numLangsCount = new int[ls.size()];
+        final AtomicInteger lineCounter = new AtomicInteger();
+        final AtomicInteger validLineCounter = new AtomicInteger();
+        final AtomicInteger unknownPages = new AtomicInteger();
+        final AtomicIntegerArray numLangsCount = new AtomicIntegerArray(ls.size() + 1);
 
-        Set<String> unknownLangs = new HashSet<String>();
-        int unknownPages = 0;
 
-        for (Object[] line : lines){
-            lineCounter++;
-            if (lineCounter % 1000000 == 0){
-                LOG.info(String.format("Done with %d total lines of Wikidata dump file", lineCounter));
-            }
-
-            String langCode = ((String)line[2]).replaceAll("wiki","");
-            if (!Language.hasLangCode(langCode)) {
-                unknownLangs.add(langCode);
-                continue;
-            }
-            Language lang = Language.getByLangCode(langCode);
-            if (!ls.containsLanguage(lang)){
-                continue;
-            }
-            Integer univId = (Integer)line[1];
-            String strTitle = (String)line[3];
-            Title title = new Title(strTitle, lang);
-            int localId = localPageDao.getIdByTitle(title);
-            if (localId <= 0){
-                unknownPages++;
-                continue;
-            }
-            if (!backend.containsKey(univId)){
-                Multimap<Language, LocalId> mmap = HashMultimap.create();
-                backend.put(univId, mmap);
-                nsBackend.put(univId, title.getNamespace()); // defines the universal page as having the namespace of the first LocalPage encountered
-                numLangsCount[0]++;
-            }else{
-                numLangsCount[backend.get(univId).size()-1]--;
-                numLangsCount[backend.get(univId).size()]++;
-            }
-            backend.get(univId).put(lang, new LocalId(lang, localId));
-            validLineCounter++;
-
-            if (validLineCounter % 10000 == 0){ // do some reporting in the log, necessary for such a large operation (both for debugging and for providing the user with something to watch :-))
-                LOG.info("Found " + validLineCounter + " local pages in input language set");
-                StringBuilder langDistLine = new StringBuilder();
-                langDistLine.append("distribution of pages per # languages: ");
-                for(int i = 0; i < numLangsCount.length; i++){
-                    langDistLine.append(numLangsCount[i]);
-                    langDistLine.append("\t");
+        ParallelForEach.iterate(lines, new Procedure<String>() {
+            @Override
+            public void call(String line) throws Exception {
+                lineCounter.incrementAndGet();
+                if (lineCounter.get() % 50000 == 0){ // do some reporting in the log, necessary for such a large operation (both for debugging and for providing the user with something to watch :-))
+                    LOG.info(
+                            "Found " + lineCounter.get() +
+                            " lines, " + validLineCounter.get() +
+                            " valid lines, local pages in input language set:" +
+                            numLangsCount);
                 }
-                LOG.info(langDistLine.toString());
-            }
-        }
 
-        LOG.warn("encountered unknown languages: " + unknownLangs);
-        LOG.warn("encountered " + unknownPages + " local pages not in the database");
+                line = line.trim();
+                if (line.endsWith(",")) {
+                    line = line.substring(0, line.length() - 1);
+                }
+                line = line.trim();
+                if (line.isEmpty()) return;
+                if (!line.startsWith("{") || !line.endsWith("}")) {
+                    LOG.info("Invalid line: " + line);
+                    return;
+                }
+                if (parser.get() == null) parser.set(new JSONParser());
+                JSONObject obj = (JSONObject) parser.get().parse(line);
+                if (!obj.containsKey("id")) return;
+                String idStr = (String) obj.get("id");
+                if (!idStr.startsWith("Q")) return;
+                int id = Integer.valueOf(idStr.substring(1));
+
+                if (!obj.containsKey("sitelinks")) return;
+                JSONObject links = (JSONObject) obj.get("sitelinks");
+                NameSpace ns = null;
+                Multimap<Language, LocalId> mm = HashMultimap.create();
+
+                validLineCounter.incrementAndGet();
+                for (Language l : ls) {
+                    String key = l.getLangCode() + "wiki";
+                    if (!links.containsKey(key)) continue;
+                    JSONObject info = (JSONObject) links.get(key);
+                    Title title = new Title((String) info.get("title"), l);
+                    ns = title.getNamespace();
+
+                    int localId = localPageDao.getIdByTitle(title);
+                    if (localId <= 0){
+                        unknownPages.incrementAndGet();
+                        continue;
+                    }
+
+                    mm.put(l, new LocalId(l, localId));
+                }
+
+                if (!mm.isEmpty()) {
+                    synchronized (backend) {
+                        backend.put(id, mm);
+                        nsBackend.put(id, ns);
+                    }
+                }
+                numLangsCount.incrementAndGet(mm.size());
+
+            }
+        });
+
+        LOG.warn("encountered " + unknownPages.get() + " local pages not in the database");
 
         return new MapperIterator<UniversalPage>(backend.keySet()) {
             @Override
@@ -118,6 +147,10 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             }
         };
 
+    }
+
+    public static File getJsonLocation(Configuration conf) {
+        return new File(conf.getFile("download.path"), "wikidata.json.bz2");
     }
 
     public static class Provider extends org.wikibrain.conf.Provider<ConceptMapper> {
@@ -140,12 +173,12 @@ public class PureWikidataConceptMapper extends ConceptMapper {
             if (!config.getString("type").equals("purewikidata")) {
                 return null;
             }
-            List<File> paths = Env.getFiles(Language.WIKIDATA, FileMatcher.WIKIDATA_ITEMS, getConfig());
-            if (paths.isEmpty()) {
-                throw new ConfigurationException("No wikidata file available for PurWikidataConceptMapper");
+            File path = getJsonLocation(getConfig());
+            if (!path.isFile()) {
+                throw new ConfigurationException("No wikidata file available for PurWikidataConceptMapper: " + path);
             }
             return new PureWikidataConceptMapper(
-                    paths.get(0),
+                    path,
                     config.getInt("algorithmId"),
                     getConfigurator().get(
                             LocalPageDao.class,

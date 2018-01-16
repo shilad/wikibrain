@@ -22,11 +22,11 @@ public class MostSimilarExample {
         Env env = EnvBuilder.envFromArgs(args);
         Configurator conf = env.getConfigurator();
         LocalPageDao lpDao = conf.get(LocalPageDao.class);
-        Language simple = Language.getByLangCode("simple");
+        Language simple = env.getDefaultLanguage();
 
         // Retrieve the "milnewitten" sr metric for simple english
         SRMetric sr = conf.get(
-                SRMetric.class, "simple-ensemble",
+                SRMetric.class, "prebuiltword2vec",
                 "language", simple.getLangCode());
 
         //Similarity between strings

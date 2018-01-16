@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class WikidataValue implements Serializable {
 
-    public enum Type {ITEM, TIME, STRING, INT, NOVALUE, SOMEVALUE, OTHER};
+    public enum Type {ITEM, PROPERTY, TIME, STRING, INT, NOVALUE, SOMEVALUE, OTHER};
 
     private Type type;
     private String typeName;
@@ -30,6 +30,14 @@ public class WikidataValue implements Serializable {
         obj.addProperty("numeric-id", itemId);
         return new WikidataValue(Type.ITEM, itemId, obj);
     }
+
+    public static WikidataValue forProperty(int propId) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("entity-type", "property");
+        obj.addProperty("numeric-id", propId);
+        return new WikidataValue(Type.PROPERTY, propId, obj);
+    }
+
 
     public static WikidataValue forInt(int value) {
         return new WikidataValue(Type.INT, value, new JsonPrimitive(value));

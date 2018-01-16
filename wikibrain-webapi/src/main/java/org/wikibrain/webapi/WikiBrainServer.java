@@ -11,6 +11,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.jooq.tools.StringUtils;
+import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.ConfigurationException;
@@ -25,7 +26,10 @@ import org.wikibrain.core.model.NameSpace;
 import org.wikibrain.sr.SRMetric;
 import org.wikibrain.sr.SRResult;
 import org.wikibrain.sr.SRResultList;
+import org.wikibrain.sr.normalize.Normalizer;
+import org.wikibrain.sr.vector.DenseVectorSRMetric;
 import org.wikibrain.sr.wikify.Wikifier;
+import org.wikibrain.utils.WbMathUtils;
 import org.wikibrain.utils.WpCollectionUtils;
 
 import javax.servlet.ServletException;
@@ -43,6 +47,8 @@ public class WikiBrainServer extends AbstractHandler {
     private final LocalPageDao pageDao;
     private final LocalLinkDao linkDao;
     private final LocalCategoryMemberDao catDao;
+    private String srName = "fast-ensemble";
+    private String vectorSrName = "prebuiltword2vec";
     private WebEntityParser entityParser;
 
     public WikiBrainServer(Env env) throws ConfigurationException, DaoException {
@@ -52,6 +58,9 @@ public class WikiBrainServer extends AbstractHandler {
         this.linkDao = env.getConfigurator().get(LocalLinkDao.class);
         this.catDao = env.getConfigurator().get(LocalCategoryMemberDao.class);
 
+    }
+
+    public void init() throws ConfigurationException, DaoException {
         // Warm up necessary components
         for (Language l : env.getLanguages()) {
             LOG.info("warming up components for language: " + l);
@@ -76,13 +85,15 @@ public class WikiBrainServer extends AbstractHandler {
             } else if (target.equals("/similarity")) {
                 doSimilarity(req);
             } else if (target.equals("/cosimilarity")) {
-                throw new UnsupportedOperationException();
+                doCosimilarity(req);
             } else if (target.equals("/mostSimilar")) {
                 doMostSimilar(req);
             } else if (target.equals("/wikify")) {
                 doWikify(req);
             } else if (target.equals("/pageRank")) {
                 doPageRank(req);
+            } else if (target.equals("/vector")) {
+                doVector(req);
             } else if (target.equals("/articlesInCategory")) {
                 doArticlesInCategory(req);
             } else if (target.equals("/categoriesForArticle")) {
@@ -107,7 +118,13 @@ public class WikiBrainServer extends AbstractHandler {
     }
 
     private SRMetric getSr(Language lang) throws ConfigurationException {
-        return env.getConfigurator().get(SRMetric.class, "simple-ensemble", "language", lang.getLangCode());
+        return env.getConfigurator().get(SRMetric.class, srName, "language", lang.getLangCode());
+    }
+
+    private DenseVectorSRMetric getVectorSr(Language lang) throws ConfigurationException {
+        return (DenseVectorSRMetric) env.getConfigurator().get(
+                SRMetric.class, vectorSrName,
+                "language", lang.getLangCode());
     }
 
     private void doSimilarity(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
@@ -162,6 +179,80 @@ public class WikiBrainServer extends AbstractHandler {
             jsonResults.add(obj);
         }
         req.writeJsonResponse("results", jsonResults);
+    }
+
+    private void doVector(WikiBrainWebRequest req) throws DaoException, ConfigurationException {
+        Language lang = req.getLanguage();
+        WebEntity entity = entityParser.extractEntity(req);
+        DenseVectorSRMetric sr = getVectorSr(lang);
+        float [] v = null;
+        switch (entity.getType()) {
+            case ARTICLE_ID: case TITLE:
+                v = sr.getGenerator().getVector(entity.getArticleId());
+                break;
+            case PHRASE:
+                v = sr.getGenerator().getVector(entity.getPhrase());
+                break;
+            default:
+                throw new WikiBrainWebException("Unsupported entity type: " + entity.getType());
+        }
+        JSONArray jsv = new JSONArray();
+        if (v != null) {
+            for (float x : v) jsv.add(x);
+        }
+        req.writeJsonResponse("entity", entity.toJson(), "vector", jsv);
+    }
+
+    private float[] getVector(DenseVectorSRMetric metric, WebEntity we) throws DaoException {
+        switch (we.getType()) {
+            case ARTICLE_ID: case TITLE:
+                return metric.getGenerator().getVector(we.getArticleId());
+            case PHRASE:
+                return metric.getGenerator().getVector(we.getPhrase());
+            default:
+                throw new WikiBrainWebException("Unsupported entity type: " + we.getType());
+        }
+    }
+
+    private void doCosimilarity(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
+        Language lang = req.getLanguage();
+        List<WebEntity> rowEntities = entityParser.extractEntityList("row", req);
+        List<WebEntity> colEntities = entityParser.extractEntityList("column", req);
+        WebEntity.Type type = rowEntities.get(0).getType();
+        if (type != colEntities.get(0).getType()) {
+            throw new WikiBrainWebException("Rows and columns must both be the same type (article, title, or phrase).");
+        }
+        DenseVectorSRMetric sr = getVectorSr(lang);
+        Normalizer normalizer = sr.getSimilarityNormalizer();
+        JSONArray rowJsons = new JSONArray();
+        JSONArray colJsons = new JSONArray();
+        List<float []> rowVectors = new ArrayList<float []>();
+        List<float []> colVectors = new ArrayList<float []>();
+        for (WebEntity we : rowEntities) {
+            rowVectors.add(getVector(sr, we));
+            rowJsons.add(we.toJson());
+        }
+        for (WebEntity we : colEntities) {
+            colVectors.add(getVector(sr, we));
+            colJsons.add(we.toJson());
+        }
+
+        JSONArray cosims = new JSONArray();
+        for (int i = 0; i < rowVectors.size(); i++) {
+            JSONArray rowSims = new JSONArray();
+            for (int j = 0; j < colVectors.size(); j++) {
+                float [] v1 = rowVectors.get(i);
+                float [] v2 = colVectors.get(j);
+                if (v1 == null || v2 == null) {
+                    rowSims.add(0.0);
+                } else {
+                    rowSims.add(normalizer.normalize(WbMathUtils.dot(v1, v2)));
+                }
+            }
+            cosims.add(rowSims);
+        }
+
+        req.writeJsonResponse("rows", rowJsons, "cols", colJsons, "cosims", cosims);
     }
 
     private void doPageRank(WikiBrainWebRequest req) throws ConfigurationException, DaoException {
@@ -312,13 +403,30 @@ public class WikiBrainServer extends AbstractHandler {
         options.addOption(
                 new DefaultOptionBuilder()
                         .withLongOpt("port")
+                        .hasArg()
                         .withDescription("Server port number")
                         .create("p"));
         options.addOption(
                 new DefaultOptionBuilder()
+                        .hasArg()
                         .withLongOpt("listeners")
                         .withDescription("Size of listener queue")
                         .create("q"));
+
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("metric")
+                        .hasArg()
+                        .withDescription("Semantic relatedness metric")
+                        .create("m"));
+
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("vmetric")
+                        .hasArg()
+                        .withDescription("Vector-based semantic relatedness metric")
+                        .create("v"));
+
 
         EnvBuilder.addStandardOptions(options);
 
@@ -337,7 +445,12 @@ public class WikiBrainServer extends AbstractHandler {
         int port = Integer.valueOf(cmd.getOptionValue("p", "8000"));
         int queueSize = Integer.valueOf(cmd.getOptionValue("q", "100"));
         Server server = new Server(new QueuedThreadPool(queueSize, 20));
-        server.setHandler(new WikiBrainServer(env));
+        WikiBrainServer wbServer = new WikiBrainServer(env);
+        if (cmd.hasOption("m")) wbServer.srName = cmd.getOptionValue("m");
+        if (cmd.hasOption("v")) wbServer.vectorSrName = cmd.getOptionValue("v");
+        System.err.println("NAME IS " + wbServer.vectorSrName);
+        wbServer.init();
+        server.setHandler(wbServer);
         ServerConnector sc = new ServerConnector(server);
         sc.setPort(port);
         server.setConnectors(new Connector[]{sc});

@@ -83,6 +83,39 @@ public class WebEntityParser {
         return result;
     }
 
+    public List<WebEntity> extractEntityList(String prefix, WikiBrainWebRequest req) throws WikiBrainWebException, DaoException {
+        int numMatches = 0;
+        for (WebEntity.Type t : WebEntity.Type.values()) {
+            if (req.hasParam(prefix + t.toCapitalizedPluralString())) numMatches++;
+        }
+
+        if (numMatches != 1) {
+            String errorMessage = "Must specify exactly one of the following params:";
+            for (WebEntity.Type t : WebEntity.Type.values()) {
+                errorMessage += " " + prefix + t.toCapitalizedPluralString();
+            }
+            throw new WikiBrainWebException(errorMessage);
+        }
+
+        String values = null;
+        WebEntity.Type type = null;
+        Language lang = req.getLanguage();
+        for (WebEntity.Type t : WebEntity.Type.values()) {
+            if (req.hasParam(prefix + t.toCapitalizedPluralString())) {
+                type = t;
+                values = req.getParam(prefix + t.toCapitalizedPluralString());
+                break;
+            }
+        }
+        if (type == null) throw new IllegalStateException();
+
+        List<WebEntity> result = new ArrayList<WebEntity>();
+        for (String value : values.split("\\|")) {
+            result.add(makeWebEntity(lang, type, value));
+        }
+        return result;
+    }
+
 
     private WebEntity makeWebEntity(Language lang, WebEntity.Type t, String value) throws DaoException {
         WebEntity we;

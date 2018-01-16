@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.8.0</version>
+        <version>0.9.0</version>
     </parent>
 
     <artifactId>wikibrain-mapper</artifactId>
@@ -14,7 +14,7 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-parser</artifactId>
-            <version>0.8.0</version>
+            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
@@ -30,6 +30,11 @@
             <groupId>net.sf.jung</groupId>
             <artifactId>jung-algorithms</artifactId>
             <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
     
