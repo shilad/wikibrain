@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>0.9.1</version>
     </parent>
 
     <artifactId>wikibrain-lucene</artifactId>
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.wikibrainapi</groupId>
             <artifactId>wikibrain-core</artifactId>
-            <version>0.9.1-SNAPSHOT</version>
+            <version>0.9.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.lucene</groupId>
