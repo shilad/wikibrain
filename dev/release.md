@@ -12,8 +12,8 @@
     
     # for major releases
     git checkout develop
-    mvn jgitflow:release-start -DskipTests=true
-    mvn jgitflow:release-finish -DskipTests=true
+    mvn gitflow:release-start -DskipTests=true
+    mvn gitflow:release-finish -DskipTests=true
     git checkout <release-version>
     mvn -P release-profile deploy -DskipTests
     ./push-major-release.sh
