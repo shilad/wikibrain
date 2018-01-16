@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wikibrainapi</groupId>
         <artifactId>wikibrain-parent</artifactId>
-        <version>0.9.0</version>
+        <version>0.9.1</version>
     </parent>
 
     <artifactId>wikibrain-utils</artifactId>
