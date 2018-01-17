@@ -12,5 +12,5 @@ mvn clean compile package -DskipTests=true &&
 mvn dependency:copy-dependencies -DoutputDirectory=$ALL_JARS &&
 cp -p wikibrain*/target/wikibrain*${version}.jar $ALL_JARS &&
 (cd $ALL_JARS && zip $target *.jar) &&
-scp -p $target $shadedjar shilad.com:/var/www/html/www.shilad.com/wikibrain
+scp -p $target $shadedjar shilad@shilad.com:/var/www/html/www.shilad.com/wikibrain
 
