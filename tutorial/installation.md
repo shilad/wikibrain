@@ -86,7 +86,7 @@ mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wiki
 You can now run WikiBrain programs from the command line as follows:
 
 ```bash
-./wb-java.sh org.wikibrain.dao.loader.PipelineLoader -l simple
+./wb-java.sh org.wikibrain.Loader -l simple
 ```
 
 ## Installing Postgresql and PostGIS
