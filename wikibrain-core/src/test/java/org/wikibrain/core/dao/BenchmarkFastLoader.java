@@ -67,7 +67,7 @@ public class BenchmarkFastLoader {
 
         long t1 = System.currentTimeMillis();
         for (int i = 0; i < NUM_ENTRIES; i++) {
-            loader.load(new Object[] {
+            loader.insert(new Object[] {
                     10,
                     "Foo bar baz",
                     324234,

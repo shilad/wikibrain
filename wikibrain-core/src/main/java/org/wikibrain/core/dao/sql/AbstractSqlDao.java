@@ -9,12 +9,9 @@ import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.MetaInfoDao;
 import org.wikibrain.core.lang.LanguageSet;
 
-import javax.sql.DataSource;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,7 +122,7 @@ public abstract class AbstractSqlDao<T> implements Dao<T> {
      * @param values
      */
     protected void insert(Object ... values) throws DaoException{
-        loader.load(values);
+        loader.insert(values);
     }
 
 

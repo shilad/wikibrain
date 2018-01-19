@@ -1,7 +1,6 @@
 package org.wikibrain.core.dao.sql;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.tools.jdbc.JDBCUtils;
 import org.wikibrain.core.dao.DaoException;
@@ -11,14 +10,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,30 +24,35 @@ import org.slf4j.LoggerFactory;
  */
 public class FastLoader {
 
+    // In benchmarks, there were no benefits to more than four workers.
     private static final int NUM_INSERTERS = Math.min(WpThreadUtils.getMaxThreads(), 4);
 
+    // Have this in the pill indicates a shutdown request has occurred
     private static final Object POSION_PILL = new Object();
-    private boolean isPostGisLoader = false;
 
     static final Logger LOG = LoggerFactory.getLogger(FastLoader.class);
     static final int BATCH_SIZE = 1000;
 
+    private boolean isPostGisLoader = false;
     private final WpDataSource ds;
     private final String table;
     private final String[] fields;
 
-    private BlockingQueue<Object[]> rowBuffer =
-            new ArrayBlockingQueue<Object[]>(BATCH_SIZE * NUM_INSERTERS * 2);
-
-    static enum InserterState {
+    // State of loader.
+    static enum LoaderState {
         RUNNING,            // In normal working mode
         FAILED,             // Loader failed, it cannot be used anymore
         SHUTTING_DOWN,      // Parent thread triggered a shutdown
         SHUTDOWN            // Already shutdown
     }
+    private volatile LoaderState loaderState = null;
 
-    private Thread [] inserters = new Thread[NUM_INSERTERS];
-    private volatile InserterState inserterState = null;
+    // Queue holding inserts destined for workers
+    private BlockingQueue<Object[]> toInsert =
+            new ArrayBlockingQueue<Object[]>(BATCH_SIZE * NUM_INSERTERS * 2);
+
+    // Threads for workers
+    private Thread [] workers = new Thread[NUM_INSERTERS];
 
     public FastLoader(WpDataSource ds, TableField[] fields) throws DaoException {
         this(ds, fields[0].getTable().getName(), getFieldNames(fields));
@@ -68,48 +68,38 @@ public class FastLoader {
         this.table = table;
         this.fields = fields;
 
-        for (int i = 0; i < inserters.length; i++) {
-            inserters[i] = new Thread(new Runnable() {
+        for (int i = 0; i < workers.length; i++) {
+            workers[i] = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        insertBatches();
+                        workerMain();
                     } catch (DaoException e) {
                         LOG.error("inserter failed", e);
-                        inserterState = InserterState.FAILED;
-                        rowBuffer.clear();  // allow any existing puts to go through
+                        loaderState = LoaderState.FAILED;
+                        toInsert.clear();  // allow any existing puts to go through
                     } catch (SQLException e) {
                         LOG.error("inserter failed", e);
-                        inserterState = InserterState.FAILED;
-                        rowBuffer.clear();  // allow any existing puts to go through
+                        loaderState = LoaderState.FAILED;
+                        toInsert.clear();  // allow any existing puts to go through
                     } catch (InterruptedException e) {
                         LOG.error("inserter interrupted", e);
-                        inserterState = InserterState.FAILED;
-                        rowBuffer.clear();  // allow any existing puts to go through
+                        loaderState = LoaderState.FAILED;
+                        toInsert.clear();  // allow any existing puts to go through
                     }
                 }
             });
-            inserters[i].start();
+            workers[i].start();
         }
-        inserterState = InserterState.RUNNING;
+        loaderState = LoaderState.RUNNING;
     }
 
-    private static String[] getFieldNames(TableField[] fields) {
-        String names[] = new String[fields.length];
-        for (int i = 0; i < fields.length; i++) {
-            names[i] = fields[i].getName();
-        }
-        return names;
-    }
 
     /**
-     * Saves a value to the datastore.
-     * @param values
-     * @throws DaoException
+     * Saves a single row of values to the datastore.
      */
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-    public void load(Object ... values) throws DaoException {
-        if (inserters == null || inserterState != InserterState.RUNNING) {
-            throw new IllegalStateException("inserter thread in state " + inserterState);
+    public void insert(Object ... values) throws DaoException {
+        if (workers == null || loaderState != LoaderState.RUNNING) {
+            throw new IllegalStateException("inserter thread in state " + loaderState);
         }
         // Hack convert dates to Timestamps
         for (int i = 0; i < values.length; i++) {
@@ -121,51 +111,64 @@ public class FastLoader {
             throw new IllegalArgumentException();
         }
         try {
-            rowBuffer.put(values);
+            toInsert.put(values);
         } catch (InterruptedException e) {
             throw new DaoException(e);
         }
     }
 
-    private void insertBatches() throws DaoException, SQLException, InterruptedException {
+    /**
+     * Main loop for each worker.
+     */
+    private void workerMain() throws DaoException, SQLException, InterruptedException {
         boolean finished = false;
 
         Connection cnx = ds.getConnection();
+
+        // Register PostGIS geometry extensions if necesary.
         if (isPostGisLoader){
             try {
 
-                ((org.postgresql.PGConnection) cnx).addDataType("geometry", Class.forName("org.postgis.PGgeometry"));
-//                ((org.postgresql.PGConnection) cnx).addDataType("geometry", Class.forName("org.postgis.Multipolygon"));
-
+                ((org.postgresql.PGConnection) cnx).addDataType(
+                        "geometry",
+                        Class.forName("org.postgis.PGgeometry"));
             }catch(ClassNotFoundException e){
-                throw new DaoException("Could not find PostGIS geometry type. Is the PostGIS library in the class path?: " + e.getMessage());
+                throw new DaoException("Could not find PostGIS geometry type. " +
+                        "Is the PostGIS library in the class path?: " + e.getMessage());
             }
         }
 
-        PreparedStatement statement = null;
-        try {
-            String [] names = new String[fields.length];
-            String [] questions = new String[fields.length];
-            for (int i = 0; i < fields.length; i++) {
-                names[i] = fields[i];
-                questions[i] = "?";
-            }
-            String sql = "INSERT INTO " +
-                    table + "(" + StringUtils.join(names, ",") + ") " +
-                    "VALUES (" + StringUtils.join(questions, ",") + ");";
-            statement = cnx.prepareStatement(sql);
+        // Prepare SQL for the prepared statement
+        String [] names = new String[fields.length];
+        String [] questions = new String[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            names[i] = fields[i];
+            questions[i] = "?";
+        }
+        String sql = "INSERT INTO " +
+                table + "(" + StringUtils.join(names, ",") + ") " +
+                "VALUES (" + StringUtils.join(questions, ",") + ");";
+        PreparedStatement statement = cnx.prepareStatement(sql);;
 
-            while (!finished && inserterState != InserterState.FAILED) {
+        // Main loop runs until we get a shutdown request (indicated by "POISON_PILL" in the buffer).
+        // Even if we encounter an error, we try to continue.
+        try {
+
+            // Repeat until we get a shutdown request
+            while (!finished && loaderState != LoaderState.FAILED) {
+
                 // accumulate batch
                 int batchSize = 0;
-                while (!finished && batchSize < BATCH_SIZE && inserterState != InserterState.FAILED) {
-                    Object row[] = rowBuffer.poll(100, TimeUnit.MILLISECONDS);
+                while (!finished && batchSize < BATCH_SIZE && loaderState != LoaderState.FAILED) {
+                    Object row[] = toInsert.poll(100, TimeUnit.MILLISECONDS);
                     if (row == null) {
                         // do nothing
                     } else if (row[0] == POSION_PILL) {
-                        rowBuffer.put(new Object[]{POSION_PILL});
+                        // Pass the poison pill to the next worker and mark ourselves as finished
+                        toInsert.put(new Object[]{POSION_PILL});
                         finished = true;
                     } else {
+                        // Store row in batch
                         batchSize++;
                         for (int i = 0; i < row.length; i++) {
                             if(row[i] != null && row[i].getClass().equals(java.lang.Character.class))
@@ -176,6 +179,8 @@ public class FastLoader {
                         statement.addBatch();
                     }
                 }
+
+                // Insert batch and clear for next use
                 try {
                     statement.executeBatch();
                     cnx.commit();
@@ -196,16 +201,19 @@ public class FastLoader {
         }
     }
 
+    /**
+     * Trigger a shutdown request.
+     */
     public void endLoad() throws DaoException {
         try {
-            if (inserterState == InserterState.RUNNING) {
-                rowBuffer.put(new Object[]{POSION_PILL});
+            if (loaderState == LoaderState.RUNNING) {
+                toInsert.put(new Object[]{POSION_PILL});
             }
-            inserterState = InserterState.SHUTTING_DOWN;
+            loaderState = LoaderState.SHUTTING_DOWN;
         } catch (InterruptedException e) {
             throw new DaoException(e);
         }
-        for (Thread inserter : inserters) {
+        for (Thread inserter : workers) {
             if (inserter != null) {
                 try {
                     inserter.join(60000);
@@ -214,10 +222,25 @@ public class FastLoader {
                 }
             }
         }
-        inserterState = InserterState.SHUTDOWN;
+        loaderState = LoaderState.SHUTDOWN;
     }
 
     public void close() throws  DaoException {
         endLoad();
     }
+
+
+    /**
+     * Utility function: Get names of fields for table.
+     * @param fields
+     * @return
+     */
+    private static String[] getFieldNames(TableField[] fields) {
+        String names[] = new String[fields.length];
+        for (int i = 0; i < fields.length; i++) {
+            names[i] = fields[i].getName();
+        }
+        return names;
+    }
+
 }

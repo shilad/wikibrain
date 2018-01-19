@@ -29,8 +29,6 @@ import org.wikibrain.parser.WpParseException;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.wikibrain.core.jooq.tables.WikidataEntityAliases.*;
 import static org.wikibrain.core.jooq.tables.WikidataEntityLabels.*;
@@ -295,14 +293,14 @@ public class WikidataSqlDao extends AbstractSqlDao<WikidataStatement> implements
     @Override
     public void save(WikidataEntity entity) throws DaoException {
         for (Map.Entry<Language, String> entry : entity.getLabels().entrySet()) {
-            labelLoader.load(entity.getType().code, entity.getId(), entry.getKey().getId(), entry.getValue());
+            labelLoader.insert(entity.getType().code, entity.getId(), entry.getKey().getId(), entry.getValue());
         }
         for (Map.Entry<Language, String> entry : entity.getDescriptions().entrySet()) {
-            descLoader.load(entity.getType().code, entity.getId(), entry.getKey().getId(), entry.getValue());
+            descLoader.insert(entity.getType().code, entity.getId(), entry.getKey().getId(), entry.getValue());
         }
         for (Map.Entry<Language, List<String>> entry : entity.getAliases().entrySet()) {
             for (String alias : entry.getValue()) {
-                aliasLoader.load(entity.getType().code, entity.getId(), entry.getKey().getId(), alias);
+                aliasLoader.insert(entity.getType().code, entity.getId(), entry.getKey().getId(), alias);
             }
         }
         for (WikidataStatement stmt : entity.getStatements()) {
