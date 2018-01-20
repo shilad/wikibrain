@@ -76,6 +76,10 @@ public class Corpus {
         return getCorpusFile().isFile() && getDictionaryFile().isFile();
     }
 
+    public Wikifier getWikifer() {
+        return wikifer;
+    }
+
     public static class Provider extends org.wikibrain.conf.Provider<Corpus> {
 
         public Provider(Configurator configurator, Configuration config) throws ConfigurationException {

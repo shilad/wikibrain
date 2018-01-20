@@ -33,15 +33,20 @@ public class CorpusCreatorMain {
                         .hasArg()
                         .isRequired()
                         .withLongOpt("output")
-                        .withDescription("corpus output directory (existing data will be lost)")
+                        .withDescription("corpus output directory (existing data will be overwritten)")
                         .create("o"));
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("corpus")
                         .withDescription("Name of corpus configuration")
                         .create("p"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("fractionWikified")
+                        .withDescription("Desired fraction of terms that should be wikified (only for websail).")
+                        .create("f"));
 
         EnvBuilder.addStandardOptions(options);
 
@@ -61,8 +66,17 @@ public class CorpusCreatorMain {
         lpd.useCache(true);
         lpd.buildIfNecessary();
 
-        String corpusName = cmd.getOptionValue("corpus");
+        String corpusName = cmd.getOptionValue("corpus", "wikified");
         Corpus corpus = env.getComponent(Corpus.class, corpusName, lang);
+        if (cmd.hasOption("fractionWikified")) {
+            if (corpus.getWikifer() instanceof WebSailWikifier) {
+                double frac = Double.valueOf(cmd.getOptionValue("fractionWikified"));
+                ((WebSailWikifier)corpus.getWikifer()).setDesiredWikifiedFraction(frac);
+            } else {
+                System.err.println("fractionWikified only valid for WebSail wikified corpora.");
+                System.exit(1);
+            }
+        }
         File output = new File(cmd.getOptionValue("output"));
         if (!output.isDirectory()) {
             output.mkdirs();

@@ -50,7 +50,7 @@ public class WebSailWikifier implements Wikifier {
     private final RawPageDao rawPageDao;
 
     private double desiredWikifiedFraction = 0.25;
-    private double minLinkProbability = 0.01;
+    private double minLinkProbability = -1;
     private double minFinalScore = 0.001;
 
     public WebSailWikifier(Wikifier identityWikifier, RawPageDao rawPageDao, LocalLinkDao linkDao, LinkProbabilityDao linkProbDao, PhraseAnalyzerDao phraseDao, SRMetric metric) throws DaoException {
@@ -62,12 +62,10 @@ public class WebSailWikifier implements Wikifier {
         this.rawPageDao = rawPageDao;
         this.phraseDao = phraseDao;
         this.phraseTokenizer = new PhraseTokenizer(linkProbDao);
-        learnMinLinkProbability();
     }
 
     public void setDesiredWikifiedFraction(double frac) throws DaoException {
         desiredWikifiedFraction = frac;
-        learnMinLinkProbability();
     }
 
     private void learnMinLinkProbability() throws DaoException {
@@ -76,8 +74,8 @@ public class WebSailWikifier implements Wikifier {
         }
         LOG.info("Learning minimum link probability");
 
-        // Choose a sample of numTrainingPages * 4 and train on the longest quarter of them.
-        DaoFilter filter = DaoFilter.normalPageFilter(language).setLimit(numTrainingPages * 4);
+        // Choose a sample of numTrainingPages * 2 and train on the longest quarter of them.
+        DaoFilter filter = DaoFilter.normalPageFilter(language).setLimit(numTrainingPages * 2);
         List<RawPage> pages = IteratorUtils.toList(rawPageDao.get(filter).iterator());
         Collections.sort(pages, new Comparator<RawPage>() {
             @Override
@@ -148,6 +146,11 @@ public class WebSailWikifier implements Wikifier {
     }
 
     private List<LinkInfo> getCandidates(String text) throws DaoException {
+        if (minLinkProbability < 0) {
+            synchronized (this) {
+                if (minLinkProbability < 0)  learnMinLinkProbability();
+            }
+        }
         List<LinkInfo> candidates = new ArrayList<LinkInfo>();
         StringTokenizer tokenizer = new StringTokenizer();
         for (Token sentence : tokenizer.getSentenceTokens(language, text)) {
