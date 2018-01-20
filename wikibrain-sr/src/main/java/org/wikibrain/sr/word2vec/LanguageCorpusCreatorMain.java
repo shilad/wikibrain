@@ -1,8 +1,6 @@
 package org.wikibrain.sr.word2vec;
 
-import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
@@ -18,9 +16,7 @@ import org.wikibrain.core.cmd.EnvBuilder;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.core.dao.LocalPageDao;
 import org.wikibrain.core.dao.RawPageDao;
-import org.wikibrain.core.dao.UniversalPageDao;
 import org.wikibrain.core.lang.Language;
-import org.wikibrain.core.lang.LanguageSet;
 import org.wikibrain.core.model.LocalPage;
 import org.wikibrain.core.nlp.Dictionary;
 import org.wikibrain.download.FileDownloader;
@@ -35,16 +31,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 
 /**
  * @author Shilad Sen
  */
-public class CorpusCreatorMain {
-    private static final Logger LOG = LoggerFactory.getLogger(CorpusCreatorMain.class);
+public class LanguageCorpusCreatorMain {
+    private static final Logger LOG = LoggerFactory.getLogger(LanguageCorpusCreatorMain.class);
 
     private static final int OPTIMAL_FILE_SIZE = 50 * 1024 * 1024;
 
@@ -71,7 +65,7 @@ public class CorpusCreatorMain {
             { "ru", "http://www.statmt.org/wmt14/training-monolingual-news-crawl/news.2013.ru.shuffled.gz"},
     };
 
-    public CorpusCreatorMain(Env env, Language lang) throws ConfigurationException, DaoException {
+    public LanguageCorpusCreatorMain(Env env, Language lang) throws ConfigurationException, DaoException {
         this.env = env;
         this.lang = lang;
         this.pageDao = env.getComponent(LocalPageDao.class);
@@ -263,7 +257,7 @@ public class CorpusCreatorMain {
         for (Language l : env.getLanguages()) {
             try {
                 LOG.info("Generating corpus for language " + l);
-                CorpusCreatorMain creator = new CorpusCreatorMain(env, l);
+                LanguageCorpusCreatorMain creator = new LanguageCorpusCreatorMain(env, l);
                 String path = cmd.getOptionValue("o") + "/" + l.getLangCode();
                 File file = new File(path);
                 if (!file.isDirectory() || file.list().length == 0) {

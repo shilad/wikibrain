@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class Corpus {
     private final Language language;
-    private final File directory;
+    private File directory;
     private final Wikifier wikifer;
     private final RawPageDao rawPageDao;
     private final LocalPageDao localPageDao;
@@ -45,6 +45,10 @@ public class Corpus {
     public File getDirectory() {
         return directory;
     }
+
+    public void setDirectory(String path) { this.directory = new File(path); }
+
+    public void setDirectory(File path) { this.directory = path; }
 
     public void create() throws IOException, DaoException {
         if (!this.linkProbabilityDao.isBuilt()) {

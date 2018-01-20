@@ -322,6 +322,10 @@ public class SRBuilder {
             LOG.info("set window to " + config.getInt("maxWords"));
             trainer.setWindow(config.getInt("window"));
         }
+        if (config.hasPath("iterations")) {
+            LOG.info("set iterations to " + config.getInt("iterations"));
+            trainer.setIterations(config.getInt("iterations"));
+        }
         trainer.setKeepAllArticles(true);
         trainer.train(corpus.getDirectory());
         trainer.save(model);

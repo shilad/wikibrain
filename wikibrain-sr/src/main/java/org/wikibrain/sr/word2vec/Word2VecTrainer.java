@@ -427,6 +427,10 @@ public class Word2VecTrainer {
         this.window = window;
     }
 
+    public void setIterations(int iters) {
+        this.iterations = iters;
+    }
+
     public void setKeepAllArticles(boolean keepAllArticles) {
         this.keepAllArticles = keepAllArticles;
     }

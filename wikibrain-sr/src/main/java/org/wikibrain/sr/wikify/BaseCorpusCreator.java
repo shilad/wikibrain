@@ -63,6 +63,12 @@ public abstract class BaseCorpusCreator {
      */
     public abstract Iterator<IdAndText> getCorpus() throws DaoException;
 
+    /**
+     * Sets the maximum number of articles written to the corpus.
+     * @param maxPages
+     */
+    public abstract void setMaxPages(int maxPages);
+
     public void write(File dir) throws IOException, DaoException {
         if (dir.exists()) {
             FileUtils.deleteQuietly(dir);
