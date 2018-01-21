@@ -42,6 +42,7 @@ mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wiki
 # Run everything
 screen # also setup screenlog
 export JAVA_OPTS="-d64 -Xmx12000M -server"
+export WB_LANG=en
 cat >./wmf_${WB_LANG}.conf <<HERE
     baseDir : /srv/wikibrain/${WB_LANG}
     dao.dataSource.default : psql
@@ -49,8 +50,37 @@ cat >./wmf_${WB_LANG}.conf <<HERE
         username : wikibrain
         password : wikibrain
         url : "jdbc:postgresql://localhost/wikibrain_${WB_LANG}"
+        connectionsPerPartition : 5
     }
+sr.metric.local.word2vec2 : \${sr.densevectorbase} {
+        generator : {
+            type : word2vec
+            corpus : wikified
+            modelDir : \${baseDir}"/dat/word2vec2"
+        }
+        reliesOn : [ "prebuiltword2vec" ]
+    }
+
+sr.wikifier.websail2 : {
+            type : websail
+            phraseAnalyzer : anchortext
+            sr : word2vec2
+            identityWikifier : identity
+            localLinkDao : matrix
+            useLinkProbabilityCache : true
+            desiredWikifiedFraction : 0.25
+        }
+
+sr.corpus.wikified2 : {
+            path : \${baseDir}"/dat/corpus/wikified2/"
+            wikifier : websail2
+            rawPageDao : default
+            localPageDao : default
+            phraseAnalyzer : anchortext
+}
+
 HERE
+
 sudo mkdir -p /srv/wikibrain/${WB_LANG}
 sudo chown -R shiladsen /srv/wikibrain/${WB_LANG}
 
