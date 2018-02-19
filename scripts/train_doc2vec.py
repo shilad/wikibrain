@@ -5,7 +5,7 @@
 # Words are treated as plain-text tokens and title tokens are "t:page_id:page_title"
 #
 
-from gensim.models.doc2vec import LabeledSentence, Doc2Vec
+from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 
 import logging
 import os
@@ -49,7 +49,7 @@ def line_iterator(path, kept_words):
                 labels = []
                 if article_label and article_line <= 4:
                     labels = [article_label]
-                yield LabeledSentence(words=tokens, tags=labels)
+                yield TaggedDocument(words=tokens, tags=labels)
                 article_line += 1
 
 
@@ -120,5 +120,5 @@ if __name__ == '__main__':
     it = line_iterator(corpus_dir + '/corpus.txt', freqs.keys())
     sentences = list(it)
     model = train(sentences)
-    model.save(output_path)
+    model.save_word2vec_format(output_path)
 

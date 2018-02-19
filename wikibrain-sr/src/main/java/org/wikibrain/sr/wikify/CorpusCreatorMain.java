@@ -47,6 +47,18 @@ public class CorpusCreatorMain {
                         .withLongOpt("fractionWikified")
                         .withDescription("Desired fraction of terms that should be wikified (only for websail).")
                         .create("f"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("desiredRecall")
+                        .withDescription("Desired recall of wikification (only for websail).")
+                        .create("r"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .hasArg()
+                        .withLongOpt("desiredPrecision")
+                        .withDescription("Desired precision of wikification (only for websail).")
+                        .create("p"));
 
         EnvBuilder.addStandardOptions(options);
 
@@ -72,6 +84,24 @@ public class CorpusCreatorMain {
             if (corpus.getWikifer() instanceof WebSailWikifier) {
                 double frac = Double.valueOf(cmd.getOptionValue("fractionWikified"));
                 ((WebSailWikifier)corpus.getWikifer()).setDesiredWikifiedFraction(frac);
+            } else {
+                System.err.println("fractionWikified only valid for WebSail wikified corpora.");
+                System.exit(1);
+            }
+        }
+        if (cmd.hasOption("desiredRecall")) {
+            if (corpus.getWikifer() instanceof WebSailWikifier) {
+                double r = Double.valueOf(cmd.getOptionValue("desiredRecall"));
+                ((WebSailWikifier)corpus.getWikifer()).setDesiredRecall(r);
+            } else {
+                System.err.println("fractionWikified only valid for WebSail wikified corpora.");
+                System.exit(1);
+            }
+        }
+        if (cmd.hasOption("desiredPrecision")) {
+            if (corpus.getWikifer() instanceof WebSailWikifier) {
+                double p = Double.valueOf(cmd.getOptionValue("desiredPrecision"));
+                ((WebSailWikifier)corpus.getWikifer()).setDesiredPrecision(p);
             } else {
                 System.err.println("fractionWikified only valid for WebSail wikified corpora.");
                 System.exit(1);

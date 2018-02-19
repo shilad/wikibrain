@@ -616,6 +616,14 @@ public class WebSailWikifier implements Wikifier {
         this.minFinalScore = minFinalScore;
     }
 
+    public void setDesiredPrecision(double desiredPrecision) {
+        this.desiredPrecision = desiredPrecision;
+    }
+
+    public void setDesiredRecall(double desiredRecall) {
+        this.desiredRecall = desiredRecall;
+    }
+
     private List<LocalLink> link(int wpId, String text, List<LinkInfo> infos) throws DaoException {
         BitSet used = new BitSet(text.length());
         List<LocalLink> results = identityWikifier.wikify(wpId, text);
