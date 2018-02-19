@@ -1,11 +1,17 @@
 package org.wikibrain.sr.wikify;
 
 import com.typesafe.config.Config;
+import gnu.trove.list.TDoubleList;
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikibrain.conf.Configuration;
@@ -14,16 +20,18 @@ import org.wikibrain.conf.Configurator;
 import org.wikibrain.core.cmd.Env;
 import org.wikibrain.core.dao.*;
 import org.wikibrain.core.lang.Language;
+import org.wikibrain.core.lang.LocalId;
 import org.wikibrain.core.model.LocalLink;
 import org.wikibrain.core.model.RawPage;
 import org.wikibrain.core.nlp.StringTokenizer;
 import org.wikibrain.core.nlp.Token;
 import org.wikibrain.phrases.*;
 import org.wikibrain.sr.SRMetric;
-import org.wikibrain.utils.ParallelForEach;
-import org.wikibrain.utils.Procedure;
-import org.wikibrain.utils.Scoreboard;
+import org.wikibrain.sr.vector.DenseVectorSRMetric;
+import org.wikibrain.utils.*;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -38,7 +46,8 @@ public class WebSailWikifier implements Wikifier {
     /**
      * TODO: Make this configurable
      */
-    private int numTrainingPages = 500;
+    private int numTrainingPages = 100;
+    private static final int SMOOTH_PRIOR = 2;
 
     private final Wikifier identityWikifier;
     private final SRMetric metric;
@@ -48,10 +57,28 @@ public class WebSailWikifier implements Wikifier {
     private final LocalLinkDao linkDao;
     private final PhraseAnalyzerDao phraseDao;
     private final RawPageDao rawPageDao;
+    private boolean training = false;
 
-    private double desiredWikifiedFraction = 0.25;
+    private double desiredWikifiedFraction = 0.05;
+    private double desiredPrecision = 0.99;
+    private double desiredRecall = 1.0;
     private double minLinkProbability = -1;
     private double minFinalScore = 0.001;
+
+
+    // Model is: correct ~ smoothed_prior + sr + gap + existing + only + log(linkprob)
+    private static final int COEF_OFFSET_INDEX = 0;
+    private static final int COEF_PRIOR_INDEX = 1;
+    private static final int COEF_SR_INDEX = 2;
+    private static final int COEF_GAP_INDEX = 3;
+    private static final int COEF_EXISTS_INDEX = 4;
+    private static final int COEF_ONLY_INDEX = 5;
+    private static final int COEF_LINKPROB_INDEX = 6;
+
+    private double [] coefficients = new double[7];
+    {
+        Arrays.fill(coefficients, 1.0 / 7);
+    }
 
     public WebSailWikifier(Wikifier identityWikifier, RawPageDao rawPageDao, LocalLinkDao linkDao, LinkProbabilityDao linkProbDao, PhraseAnalyzerDao phraseDao, SRMetric metric) throws DaoException {
         this.identityWikifier = identityWikifier;
@@ -66,6 +93,12 @@ public class WebSailWikifier implements Wikifier {
 
     public void setDesiredWikifiedFraction(double frac) throws DaoException {
         desiredWikifiedFraction = frac;
+    }
+
+    public void train() throws DaoException {
+        // Set initial values
+        learnMinLinkProbability();
+        trainCoefficients();
     }
 
     private void learnMinLinkProbability() throws DaoException {
@@ -141,6 +174,240 @@ public class WebSailWikifier implements Wikifier {
         LOG.info("Set minimum final score to " + minFinalScore + " to achieve " + desiredWikifiedFraction + "% wikification");
     }
 
+    private synchronized void trainCoefficients() throws DaoException {
+        LOG.info("Learning coefficients");
+        training = true;
+
+        // Choose a sample of numTrainingPages .
+        DaoFilter filter = DaoFilter.normalPageFilter(language).setLimit(1000);
+        final Map<LocalLink, LinkInfo> train = new HashMap<LocalLink, LinkInfo>();
+
+        final List<List<LinkInfo>> results = new ArrayList<List<LinkInfo>>();
+        ParallelForEach.iterate(rawPageDao.get(filter).iterator(), new Procedure<RawPage>() {
+            @Override
+            public void call(RawPage page) throws Exception {
+                String text = page.getPlainText(false);
+                Map<Integer, LocalLink> actual = new HashMap<Integer, LocalLink>();
+                for (LocalLink ll : identityWikifier.wikify(page.getLocalId(), text)) {
+                    actual.put(ll.getLocation(), ll);
+                }
+                Map<Integer, LinkInfo> candidates = new HashMap<Integer, LinkInfo>();
+                for (LinkInfo li : scoreMentions(page.getLocalId(), text)) {
+                    int loc = li.getStartChar();
+                    if (actual.containsKey(loc) && actual.get(loc).getAnchorText().equals(li.getAnchortext())) {
+                        candidates.put(loc, li);
+                    }
+                }
+
+                synchronized (train) {
+                    for (int loc : candidates.keySet()) {
+                        LocalLink ll = actual.get(loc);
+                        LinkInfo li = candidates.get(loc);
+                        // Mark the correct existing link
+                        for (int id : li.getCandidates()) {
+                            li.getFeature(id).correct = (id == ll.getDestId());
+                        }
+                        train.put(actual.get(loc), candidates.get(loc));
+                    }
+                }
+            }
+        });
+
+        trainModel(train);
+//        writeTrainingDataset(train);
+
+        training = false;
+    }
+
+    private void trainModel(Map<LocalLink, LinkInfo> train) {
+        Random rand = new Random();
+
+        // Build up the training dataset.
+        // Randomize the existing link settings...
+        // Holding out the link itself out penalizes things too much.
+        // In practice, we expect *most* existing links to be correct, but not all of them.
+        List<LinkInfo> candidates = new ArrayList<LinkInfo>();
+        for (LinkInfo li : train.values()) {
+
+            // Are we missing data?
+            if (li == null || li.getDest() == null) continue;
+
+            // Does this link info represent the only candidate?
+            if (li.hasOnePossibility() && li.getPrior().getTotal() == 1) continue;
+
+            for (int id : li.getCandidates()) {
+                LinkInfo.Feature f = li.getFeature(id);
+                if (f.correct) {
+                    f.existingLink = f.existingLink || rand.nextDouble() < 0.2;
+                } else {
+                    f.existingLink = f.existingLink || rand.nextDouble() < 0.005;
+                }
+            }
+
+            candidates.add(li);
+        }
+
+        // Within location stage: Train the model to score candidatres for a particular location\
+        // model is: is_correct ~ smoothed_prior + sr + has_existing
+
+        // Build up the within training dataset
+        int n = 0;
+        for (LinkInfo li : candidates) n += li.getCandidates().size();
+        double[][] X1 = new double[n][3];
+        double [] Y1 = new double[n];
+        int i = 0;
+        for (LinkInfo li : candidates) {
+            List<Integer> cands = new ArrayList<Integer>(li.getCandidates());
+            Collections.sort(cands);
+            for (int id : cands) {
+                LinkInfo.Feature f = li.getFeature(id);
+
+                X1[i][0] = f.sr;
+                X1[i][1] = 1.0 * f.priorCount / (SMOOTH_PRIOR + f.totalCount);
+                X1[i][2] = f.existingLink ? 1 : 0;
+                Y1[i] = f.correct ? 1 : 0;
+                i++;
+            }
+        }
+        assert(i == n);
+
+        // Fit model and create scores.
+        OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+        regression.newSampleData(Y1, X1);
+        LOG.info("R^2 for stage 1 of NER regression is " + regression.calculateAdjustedRSquared());
+        double[] coefficients = regression.estimateRegressionParameters();
+        double[] scores = new double[n];
+        for (i = 0; i < n; i++) {
+            scores[i] = coefficients[0];
+            for (int j = 0; j < X1[i].length; j++) {
+                scores[i] += coefficients[j + 1] * X1[i][j];
+            }
+        }
+
+        // Between location stage: Find the top-scoring within-link candidates.
+        // Train a model for across-link top candidates
+        // Model is: correct ~ smoothed_prior + sr + gap + existing + only + log(linkprob)
+        double [][] X2 = new double[candidates.size()][6];
+        double [] Y2 = new double[candidates.size()];
+
+        int offset = 0;
+        for (i = 0; i < candidates.size(); i++) {
+            LinkInfo li = candidates.get(i);
+            List<Integer> cands = new ArrayList<Integer>(li.getCandidates());
+            Collections.sort(cands);
+
+            double[] candScores = Arrays.copyOfRange(scores, offset, offset+cands.size());
+            int maxIndex = 0;
+            for (int j = 1; j < candScores.length; j++) {
+                if (candScores[j] > candScores[maxIndex]) {
+                    maxIndex = j;
+                }
+            }
+            Arrays.sort(candScores);
+            ArrayUtils.reverse(candScores);
+
+            LinkInfo.Feature f = li.getFeature(cands.get(maxIndex));
+            X2[i][COEF_PRIOR_INDEX - 1] = 1.0 * f.priorCount / (SMOOTH_PRIOR + f.totalCount);
+            X2[i][COEF_SR_INDEX - 1] = f.sr;
+            X2[i][COEF_GAP_INDEX - 1] = (candScores.length == 1) ? 0.0 : (candScores[0] - candScores[1]);
+            X2[i][COEF_EXISTS_INDEX - 1] = f.existingLink ? 1 : 0;
+            X2[i][COEF_ONLY_INDEX - 1] = (candScores.length == 1) ? 1.0 : 0.0;
+            X2[i][COEF_LINKPROB_INDEX - 1] = Math.log(li.getLinkProbability());
+            Y2[i] = f.correct ? 1.0 : 0.0;
+
+            offset += cands.size();
+        }
+
+        // Fit model and report scores.
+        regression = new OLSMultipleLinearRegression();
+        regression.newSampleData(Y2, X2);
+        double[] estimates = regression.estimateRegressionParameters();
+
+        LOG.info("R^2 for stage 2 of NER regression is " + regression.calculateAdjustedRSquared());
+        LOG.info("Coefficients for stage 2 are: " + ArrayUtils.toString(estimates));
+
+        this.coefficients = ArrayUtils.clone(estimates);
+
+        List<double[]> finalResults = new ArrayList<double[]>(); // array of (score, label)
+        for (i = 0; i < X2.length; i++) {
+            double s = this.coefficients[0];
+            for (int j = 0; j < X2[i].length; j++) {
+                s += this.coefficients[j + 1] * X2[i][j];
+            }
+            finalResults.add(new double[] { s, Y2[i]});
+        }
+        Collections.sort(finalResults, new Comparator<double[]>() {
+            @Override
+            public int compare(double[] o1, double[] o2) {
+                return -1 * Double.compare(o1[0], o2[0]);
+            }
+        });
+        int totalPositive = 0;
+        for (double y : Y2) {
+            if (y > 0.5) totalPositive++;
+        }
+
+        int k;
+        int hits = 0;
+        for (k = 0; k < finalResults.size(); k++) {
+            if (finalResults.get(k)[1] > 0.5) hits++;
+
+            // Go through at least 20% of the results...
+            if (k > finalResults.size() / 5) {
+                if (1.0 * hits / totalPositive > desiredRecall) break;
+                if (1.0 * hits / k < desiredPrecision) break;
+            }
+        }
+        this.minFinalScore = finalResults.get(k)[0];
+        LOG.info("Set score cutoff at " + this.minFinalScore +
+                " yielding precision  " + (1.0 * hits / k ) +
+                " and recall " + 1.0 * hits / totalPositive);
+
+    }
+
+    private void writeTrainingDataset(Map<LocalLink, LinkInfo> train) throws DaoException {
+        try {
+            int total = 0;
+            int hits = 0;
+            BufferedWriter writer = WpIOUtils.openWriter("analyses/data/ner.tsv");
+            writer.write("id\trank\tcorrect\texisting\tsr\tprior\ttotal\tlinkprob\tscore\n");
+            for (LocalLink actual : train.keySet()) {
+                LinkInfo li = train.get(actual);
+                // Are we missing data?
+                if (li == null || li.getDest() == null || actual == null) continue;
+
+                // Does this link info represent the only candidate?
+                if (li.hasOnePossibility() && li.getPrior().getTotal() == 1) continue;
+
+                total++;
+                int rank = 1;
+                for (int id : li.getCandidates()) {
+                    LinkInfo.Feature f = li.getFeature(id);
+                    writer.write("" +
+                            total + "\t" +
+                            rank + "\t" +
+                            (f.correct ? 1 : 0) + "\t" +
+                            (f.existingLink ? 1 : 0) + "\t" +
+                            f.sr + "\t" +
+                            f.priorCount + "\t" +
+                            f.totalCount + "\t" +
+                            li.getLinkProbability() + "\t" +
+                            f.score + "\n"
+                    );
+                    rank++;
+                }
+                if (li.getDest() == actual.getDestId()) {
+                    hits++;
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
+
+
+    }
+
     private List<LinkInfo> getCandidates(int wpId, String text) throws DaoException {
         return getCandidates(text); // We should do something smarter with the text.
     }
@@ -148,7 +415,7 @@ public class WebSailWikifier implements Wikifier {
     private List<LinkInfo> getCandidates(String text) throws DaoException {
         if (minLinkProbability < 0) {
             synchronized (this) {
-                if (minLinkProbability < 0)  learnMinLinkProbability();
+                if (minLinkProbability < 0)  train();
             }
         }
         List<LinkInfo> candidates = new ArrayList<LinkInfo>();
@@ -163,6 +430,7 @@ public class WebSailWikifier implements Wikifier {
                 }
             }
         }
+
         return candidates;
     }
 
@@ -182,6 +450,30 @@ public class WebSailWikifier implements Wikifier {
         // Score every possible mention
         for (LinkInfo li : mentions) {
             scoreInfo(existingIds, li, sr);
+        }
+        if (training) {
+            TIntIntMap counts = getActualLinksAndCounts(wpId);
+            for (LinkInfo li : mentions) {
+                for (int id : li.getCandidates()) {
+                    LinkInfo.Feature f = li.getFeature(id);
+                    f.sr = sr.get(id);
+
+                    // In the calculations below, we don't include the training link itself
+                    f.priorCount= li.getPrior().get(id) - 1;
+                    f.totalCount = li.getPrior().getTotal() - 1;
+                    f.existingLink = counts.get(id) > 1;
+                    f.score = li.getScore();
+
+                    // if this is the only link adjust sr by removing the 1.0
+                    if (counts.containsKey(id) && counts.get(id) == 1) {
+                        if (existingIds.size() == 1) {
+                            f.sr = Double.NaN;
+                        } else {
+                            f.sr = (f.sr * existingIds.size() - 1.0) / (existingIds.size() - 1);
+                        }
+                    }
+                }
+            }
         }
 
         return mentions;
@@ -245,17 +537,25 @@ public class WebSailWikifier implements Wikifier {
 
         Scoreboard<Integer> scores = li.getScores();
         for (int id : li.getPrior().keySet()) {
-            double score = 0.4 * sr.get(id) + 0.6 * li.getPrior().get(id) / li.getPrior().getTotal();
-            score *= li.getLinkProbability();
+            double score = coefficients[COEF_OFFSET_INDEX] +
+                           coefficients[COEF_SR_INDEX] + sr.get(id) +
+                           coefficients[COEF_PRIOR_INDEX] * li.getPrior().get(id) / (li.getPrior().getTotal() + SMOOTH_PRIOR) +
+                           coefficients[COEF_LINKPROB_INDEX] * Math.log(li.getLinkProbability());
             if (existingIds.contains(id)) {
-                score += 0.2;
+                score += coefficients[COEF_EXISTS_INDEX];
+
             }
             scores.add(id, score);
         }
 
+        double score = scores.getScore(0);
+        if (scores.size() == 1) {
+            score += coefficients[COEF_ONLY_INDEX];
+        } else {
+            score += coefficients[COEF_GAP_INDEX] * (scores.getScore(0) - scores.getScore(1));
+        }
         li.setDest(scores.getElement(0));
-        double multiplier = (scores.size() == 1) ? 0.2 : (scores.getScore(0) - scores.getScore(1));
-        li.setScore(scores.getScore(0) * multiplier);
+        li.setScore(score);
     }
 
     private TIntSet getActualLinks(int wpId) throws DaoException {
@@ -268,6 +568,17 @@ public class WebSailWikifier implements Wikifier {
         // hack: add the link itself
         existingIds.add(wpId);
         return existingIds;
+    }
+    private TIntIntMap getActualLinksAndCounts(int wpId) throws DaoException {
+        TIntIntMap counts = new TIntIntHashMap();
+        for (LocalLink ll : linkDao.getLinks(language, wpId, true)) {
+            if (ll.getDestId() >= 0) {
+                counts.adjustOrPutValue(ll.getDestId(), 1, 1);
+            }
+        }
+        // hack: add the link itself
+        counts.put(wpId, 1);
+        return counts;
     }
 
     private TIntDoubleMap calculateConceptRelatedness(TIntSet existingIds, List<LinkInfo> infos) throws DaoException {
@@ -376,6 +687,12 @@ public class WebSailWikifier implements Wikifier {
 
                 if (config.hasPath("desiredWikifiedFraction")) {
                     wikifier.setDesiredWikifiedFraction(config.getDouble("desiredWikifiedFraction"));
+                }
+                if (config.hasPath("desiredRecall")) {
+                    wikifier.desiredRecall = config.getDouble("desiredRecall");
+                }
+                if (config.hasPath("desiredPrecision")) {
+                    wikifier.desiredPrecision = config.getDouble("desiredPrecision");
                 }
                 return wikifier;
             } catch (DaoException e) {

@@ -1,5 +1,8 @@
 package org.wikibrain.sr.wikify;
 
+import gnu.trove.map.TIntDoubleMap;
+import gnu.trove.map.TIntFloatMap;
+import gnu.trove.map.hash.TIntFloatHashMap;
 import gnu.trove.set.TIntSet;
 import org.wikibrain.core.lang.Language;
 import org.wikibrain.core.model.LocalLink;
@@ -7,10 +10,13 @@ import org.wikibrain.core.nlp.Token;
 import org.wikibrain.phrases.PrunedCounts;
 import org.wikibrain.utils.Scoreboard;
 
+import java.util.*;
+
 /**
 * @author Shilad Sen
 */
 public class LinkInfo implements Comparable<LinkInfo> {
+
     private String anchortext;
 
     private double linkProbability;
@@ -24,6 +30,20 @@ public class LinkInfo implements Comparable<LinkInfo> {
 
     private int startChar;
     private int endChar;
+    private int srSize;
+
+
+    // Only used when training the NER model
+    protected static class Feature {
+        int id;
+        double sr;
+        int priorCount;
+        int totalCount;
+        boolean correct;
+        boolean existingLink;    // whether another link exists to article
+        double score;
+    }
+    private Map<Integer, Feature> features = null;
 
     public LinkInfo() {}
 
@@ -50,6 +70,10 @@ public class LinkInfo implements Comparable<LinkInfo> {
 
     public void addScore(int wpId, double score) {
         getScores().add(wpId, score);
+    }
+
+    public Set<Integer> getCandidates() {
+        return (prior == null) ? new HashSet<Integer>() :  prior.keySet();
     }
 
     @Override
@@ -174,5 +198,17 @@ public class LinkInfo implements Comparable<LinkInfo> {
 
     public LocalLink toLocalLink(Language language, int wpId) {
         return new LocalLink(language, anchortext, wpId, dest, true, startChar, true, LocalLink.LocationType.NONE);
+    }
+
+    public Feature getFeature(int id) {
+        if (features == null) {
+            features = new HashMap<Integer, Feature>();
+        }
+        if (!features.containsKey(id)) {
+            Feature f = new Feature();
+            f.id = id;
+            features.put(id, f);
+        }
+        return features.get(id);
     }
 }

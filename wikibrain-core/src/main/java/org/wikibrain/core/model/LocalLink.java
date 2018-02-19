@@ -40,6 +40,26 @@ public class LocalLink implements Comparable<LocalLink> {
         return r;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LocalLink localLink = (LocalLink) o;
+        return localLink.compareTo(this) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = language.hashCode();
+        result = 31 * result + (anchorText != null ? anchorText.hashCode() : 0);
+        result = 31 * result + sourceId;
+        result = 31 * result + destId;
+        result = 31 * result + (isOutlink ? 1 : 0);
+        result = 31 * result + location;
+        return result;
+    }
+
     public static enum LocationType {FIRST_PARA, FIRST_SEC, NONE}
 
     public LocalLink(Language language, String anchorText, int sourceId, int destId, boolean outlink, int location, Boolean parseable, LocationType locType) {

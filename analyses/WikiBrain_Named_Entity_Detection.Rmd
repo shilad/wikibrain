@@ -1,0 +1,93 @@
+---
+title: "WikiBrain Named-Entity Detection"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Import data and setup
+```{r}
+library(tidyverse)
+library(caret)
+```
+```{r cache=TRUE}
+ner_df <- read_tsv( "/Users/ssen/IdeaProjects/wikibrain/analyses/data/ner.tsv")
+ner_df$correct <-ner_df$correct == 1
+ner_df$existing <-ner_df$existing == 1
+head(ner_df)
+```
+
+Analyze how often we are correct with the existing algorithm:
+```{r}
+ranks <- 
+  ner_df %>% 
+  filter(correct) %>%
+  select(rank)
+
+misses <-length(unique(ner_df$id)) - nrow(ranks)
+  
+ranks <- rbind(ranks, rep(-1, misses))
+
+table(ranks)
+
+```
+Total hack: flip some of the correct links existing to 1 because this will be common. Throw in a few incorrect 1s to prevent overconfidence.
+```{r}
+cleaned <-
+  ner_df %>%
+  mutate(frac = prior / (total + 2),
+         orig_score = score,
+         existing = runif(nrow(ner_df)) < ifelse(correct, 0.2, 0.005))
+```
+
+Function to evaluate a scoring system:
+
+```{r}
+evaluate <- function(winners, scores) {
+  table(winners$correct)
+  percentiles  <- c(0.5, 0.4, 0.3, 0.2, 0.1, 0.08, 0.05, 0.02, 0.01)
+  for (p in percentiles) {
+    threshold <- quantile(scores, p)
+    preds <- scores >= threshold
+    matrix <- confusionMatrix(preds, winners$correct, 'TRUE')
+    pos <- matrix$byClass
+    print(paste("PERCENTILE ", p, " -- precision:", pos['Precision'], "recall:", pos['Recall']))
+  }
+}
+```
+
+```{r}
+model <- lm(correct ~ frac + sr + existing, cleaned)
+summary(model)
+model$scores <- predict(model, cleaned)
+```
+
+```{r}
+by_id <- cleaned %>% 
+  arrange(desc(score)) %>% 
+  group_by(id) %>% 
+  filter(row_number() <= 2) %>%
+  mutate(gap=sd(score)) %>% 
+  filter(row_number() == 1) %>%
+  ungroup()
+
+winners <- 
+  by_id %>%
+  mutate(only=is.na(gap), gap=ifelse(is.na(gap), 0, gap))
+```
+
+Evaluate the original model:
+```{r}
+evaluate(winners, winners$orig_score)
+```
+
+```{r}
+model <- lm(correct ~ frac + sr + gap + existing + only + log(linkprob), winners)
+summary(model)
+scores <- predict(model, winners)
+evaluate(winners, scores)
+```
+
+
