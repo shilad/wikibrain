@@ -5,6 +5,7 @@
 # Words are treated as plain-text tokens and title tokens are "t:page_id:page_title"
 #
 
+from collections import defaultdict
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
 
 import logging
@@ -19,13 +20,13 @@ def flatten(l):
 
 def read_word_freqs(path, min_freq):
     with open(path, encoding='utf-8') as f:
-        freqs = {}
+        freqs = defaultdict(int)
         for i, line in enumerate(f):
             if i % 1000000 == 0:
                 logging.info('reading line %d of %s', i, path)
             (tag, count, word) = line.strip().split(' ')
             if tag == 'w' and int(count) >= min_freq:
-                freqs[word] = int(count)
+                freqs[word.lower()] += int(count)
         return freqs
 
 
@@ -49,6 +50,7 @@ def line_iterator(path, kept_words):
                 labels = []
                 if article_label and article_line <= 4:
                     labels = [article_label]
+                print(tokens, labels)
                 yield TaggedDocument(words=tokens, tags=labels)
                 article_line += 1
 
@@ -68,12 +70,12 @@ def translate_token(token, kept_words):
             return [w, ct]
         elif ct:
             return [ct, w]
-        elif w in kept_words:
-            return [w]
+        elif w.lower() in kept_words:
+            return [sys.intern(w.lower())]
         else:
             return []
-    elif token in kept_words:
-        return [sys.intern(token)]
+    elif token.lower() in kept_words:
+        return [sys.intern(token.lower())]
     else:
         return []
 
@@ -81,14 +83,16 @@ def translate_token(token, kept_words):
 def train(sentences):
     alpha = 0.05
     min_alpha = 0.001
-    iters = 3
+    iters = 10
     model = Doc2Vec(
-        size=200,
-        min_count=5,
+        dm=0,
+        size=100,
+        min_count=20,
         window=10,
         iter=iters,
         sample=1e-4,
-        negative=40,
+        hs=0,
+        negative=20,
         alpha=alpha, min_alpha=alpha,
         workers=min(8, os.cpu_count())
     )
