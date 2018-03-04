@@ -109,10 +109,17 @@ def train(sentences):
     model.delete_temporary_training_data()
     return model
 
+def str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
+
 if __name__ == '__main__':
-    if len(sys.argv) != 4:
-        sys.stderr.write('usage: %s corpus_dir min_freq model_output_path\n' % sys.argv[0])
+    if len(sys.argv) not in (4, 5):
+        sys.stderr.write('usage: %s corpus_dir min_freq model_output_path [save_as_binary]\n' % sys.argv[0])
         sys.exit(1)
+
+    binary = False
+    if len(sys.argv) == 5:
+        binary = str2bool(sys.argv[4])
 
     logging.basicConfig(level=logging.INFO)
     (corpus_dir, min_freq, output_path) = sys.argv[1:]
@@ -124,5 +131,5 @@ if __name__ == '__main__':
     it = line_iterator(corpus_dir + '/corpus.txt', freqs.keys())
     sentences = list(it)
     model = train(sentences)
-    model.save_word2vec_format(output_path)
+    model.save_word2vec_format(output_path, binary=binary)
 
