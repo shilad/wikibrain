@@ -87,7 +87,7 @@ def train(sentences):
         dm=0,
         size=200,
         dbow_words=1,
-        min_count=20,
+        min_count=10,
         window=8,
         iter=iters,
         sample=1e-4,
