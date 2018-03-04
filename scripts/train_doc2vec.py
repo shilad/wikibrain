@@ -50,7 +50,6 @@ def line_iterator(path, kept_words):
                 labels = []
                 if article_label and article_line <= 4:
                     labels = [article_label]
-                print(tokens, labels)
                 yield TaggedDocument(words=tokens, tags=labels)
                 article_line += 1
 
@@ -83,12 +82,13 @@ def translate_token(token, kept_words):
 def train(sentences):
     alpha = 0.05
     min_alpha = 0.001
-    iters = 10
+    iters = 5
     model = Doc2Vec(
         dm=0,
-        size=100,
+        size=200,
+        dbow_words=1,
         min_count=20,
-        window=10,
+        window=8,
         iter=iters,
         sample=1e-4,
         hs=0,
