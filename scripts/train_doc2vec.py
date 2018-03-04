@@ -122,7 +122,7 @@ if __name__ == '__main__':
         binary = str2bool(sys.argv[4])
 
     logging.basicConfig(level=logging.INFO)
-    (corpus_dir, min_freq, output_path) = sys.argv[1:]
+    (corpus_dir, min_freq, output_path) = sys.argv[1:5]
     min_freq = int(min_freq)
 
     freqs = read_word_freqs(corpus_dir + '/dictionary.txt', min_freq)
