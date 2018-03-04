@@ -52,13 +52,13 @@ public class CorpusCreatorMain {
                         .hasArg()
                         .withLongOpt("desiredRecall")
                         .withDescription("Desired recall of wikification (only for websail).")
-                        .create("r"));
+                        .create());
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
                         .withLongOpt("desiredPrecision")
                         .withDescription("Desired precision of wikification (only for websail).")
-                        .create("p"));
+                        .create());
 
         EnvBuilder.addStandardOptions(options);
 
