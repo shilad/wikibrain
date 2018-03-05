@@ -55,4 +55,9 @@ mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wiki
 python3 ./scripts/train_doc2vec.py ${base_dir}/corpus_w2v 20 ${base_dir}/vectors.${wp_lang}.bin True
 
 # Upload to s3
-aws s3 cp ${base_dir}/vectors.${wp_lang}.bin s3://wikibrain/w2v2/
+pbzip2 -v ${base_dir}/corpus_w2v/dictionary.txt
+pbzip2 -v ${base_dir}/corpus_w2v/corpus.txt
+
+aws s3 cp ${base_dir}/vectors.${wp_lang}.bin s3://wikibrain/w2v2/${wp_lang}/
+aws s3 cp ${base_dir}/corpus_w2v/dictionary.txt.bz2 s3://wikibrain/w2v2/${wp_lang}/
+aws s3 cp ${base_dir}/corpus_w2v/corpus.txt.bz2 s3://wikibrain/w2v2/${wp_lang}/
