@@ -26,7 +26,7 @@ import zipfile
 # negative sample = 5, epoch = 20 (30). After removing low frequency words, the
 # vocabulary size is approximately 670K for WIKI and 300K for AP-NEW.
 #
-from scripts.wikibrain_corpus import WikiBrainCorpus
+from wikibrain_corpus import WikiBrainCorpus
 
 
 def train(sentences):
