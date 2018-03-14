@@ -7,7 +7,7 @@
 
 from collections import defaultdict
 from gensim.models.doc2vec import TaggedDocument, Doc2Vec
-from scripts.wikibrain_corpus import WikiBrainCorpus
+from wikibrain_corpus import WikiBrainCorpus
 
 import logging
 import os
