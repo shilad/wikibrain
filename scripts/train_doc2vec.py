@@ -105,13 +105,14 @@ def train(sentences):
         dm=0,
         size=300,
         min_count=20,
+        dbow_words=1,
         window=15,
         iter=iters,
         sample=1e-5,
         hs=0,
         negative=10,
         alpha=alpha, min_alpha=alpha,
-        workers=min(4, os.cpu_count())
+        workers=min(8, os.cpu_count())
     )
     model.build_vocab(sentences)
     for epoch in range(iters):
@@ -138,8 +139,8 @@ if __name__ == '__main__':
     if len(sys.argv) == 5:
         binary = str2bool(sys.argv[4])
 
-    logging.basicConfig(level=logging.INFO)
     (corpus_dir, min_freq, output_path) = sys.argv[1:4]
+    logging.basicConfig(format='%(asctime)s ' + corpus_dir + ': %(message)s', level=logging.INFO)
     min_freq = int(min_freq)
 
     freqs = read_word_freqs(corpus_dir + '/dictionary.txt', min_freq)
