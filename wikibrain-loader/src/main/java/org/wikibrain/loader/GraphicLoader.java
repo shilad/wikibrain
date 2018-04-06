@@ -82,7 +82,7 @@ public class GraphicLoader extends JFrame {
     public GraphicLoader() {
         super();
         this.setSize(1000, 600);
-        this.setResizable(false);
+        this.setResizable(true);
         this.setLocationRelativeTo(null);
         this.setTitle("WikiBrain Configuration");
 
@@ -321,6 +321,7 @@ public class GraphicLoader extends JFrame {
         gbc.weighty = 0.9;
         JScrollPane jsp = new JScrollPane(cmdText);
         jsp.setPreferredSize(new Dimension(300, 300));
+        jsp.setMinimumSize(new Dimension(300,300));
         jsp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         jsp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
