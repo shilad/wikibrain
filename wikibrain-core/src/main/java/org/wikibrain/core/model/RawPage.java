@@ -8,6 +8,7 @@ import org.wikibrain.core.lang.LanguageInfo;
 import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wikibrain.core.nlp.MarkupCleaner;
 
 /**
  * Contains a single page's data from Wikipedia's Xml Dump with no processing.
@@ -139,6 +140,19 @@ public class RawPage {
                 factory.setTemplateParserClass(FlushTemplates.class);
             }
             return factory.createParser().parse(body).getText();
+        }
+    }
+
+    /**
+     * Return text cleaned using Matt Mahoney's Wikipedia text cleaning script.
+     * https://github.com/facebookresearch/fastText/blob/master/get-wikimedia.sh
+     * @return
+     */
+    public String getCleanText() {
+        if (body.isEmpty()) {
+            return "";
+        } else {
+            return MarkupCleaner.cleanText(body);
         }
     }
 

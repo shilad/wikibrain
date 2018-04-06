@@ -84,7 +84,8 @@ public class WikiTextCorpusCreator extends BaseCorpusCreator{
                 RawPage rp = iter.next();
                 if (rp != null) {
                     try {
-                        String text = rp.getPlainText(false);
+//                        String text = rp.getPlainText(false);
+                        String text = rp.getCleanText();
                         if (text != null && text.trim().length() > 0) {
                             buffer = new IdAndText(rp.getLocalId(), text.trim());
                         }
