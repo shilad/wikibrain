@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.wikibrain.utils.WpIOUtils;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class Word2VecReader {
@@ -94,7 +95,7 @@ public class Word2VecReader {
         while (isDigits) {
             char c = (char) dis.read();
             if (c == ' ') break;
-            isDigits = Character.isDigit(c);
+            isDigits = Character.isDigit(c) || c == '.' || c == '-';
         }
 
         IOUtils.closeQuietly(bis);

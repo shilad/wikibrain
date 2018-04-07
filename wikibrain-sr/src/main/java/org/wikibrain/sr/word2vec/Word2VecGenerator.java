@@ -151,12 +151,9 @@ public class Word2VecGenerator implements DenseVectorGenerator {
         return new File(path.getAbsolutePath() + ".articles.matrix");
     }
 
-
     private File getPhraseIdPath() {
         return new File(path.getAbsolutePath() + ".phrases.txt");
     }
-
-
 
     private static String readString(DataInputStream dis) throws IOException {
         TByteList bytes = new TByteArrayList();
@@ -290,11 +287,6 @@ public class Word2VecGenerator implements DenseVectorGenerator {
     }
 
     public static File getModelFile(File dir, Language lang) {
-        return new File(dir, lang.getLangCode() + ".bin");
-    }
-
-    public static void main(String args[]) throws IOException {
-        Word2VecGenerator gen = new Word2VecGenerator(null, null,
-                new File("/Users/a558989/Projects/wikibrain/base-bh/dat/word2vecRaw/bh.bin"));
+        return new File(dir, lang.getLangCode() + ".txt");
     }
 }

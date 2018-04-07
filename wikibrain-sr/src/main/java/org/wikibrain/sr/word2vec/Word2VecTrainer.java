@@ -99,7 +99,7 @@ public class Word2VecTrainer {
     private int[][] wordParents;
     private String[] words = null;
     private boolean keepAllArticles = false;
-    private int iterations = 2;
+    private int iterations = 5;
 
 
     public Word2VecTrainer(LocalPageDao pageDao, Language language) {
@@ -399,7 +399,7 @@ public class Word2VecTrainer {
             }
             stream.close();
         } else {
-            DecimalFormat formatter = new DecimalFormat("#0.0000");
+            DecimalFormat formatter = new DecimalFormat("#0.000000");
             BufferedWriter stream = WpIOUtils.openWriter(path);
             stream.write(words.length + " " + layer1Size + "\n");
             for (String w : words) {
