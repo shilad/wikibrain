@@ -101,72 +101,37 @@ public class Word2VecGenerator implements DenseVectorGenerator {
         DenseMatrixWriter phraseWriter = new DenseMatrixWriter(getPhraseMatrixPath(), vconf);
         DenseMatrixWriter articleWriter = new DenseMatrixWriter(getArticleMatrixPath(), vconf);
 
-        DataInputStream dis = null;
-        InputStream bis = null;
-        try {
-            bis = WpIOUtils.openInputStream(path);
-            dis = new DataInputStream(bis);
+        Word2VecReader.WordAndVectorIterator iter = Word2VecReader.read(path);
 
-            String header = "";
-            while (true) {
-                char c = (char) dis.read();
-                if (c == '\n') break;
-                header += c;
-            }
+        int vlength = iter.getVectorLength();
+        int [] colIds = new int[vlength];
+        for (int i = 0; i < colIds.length; i++) { colIds[i] = i; }
+        int numPhrases = 0;
+        int numArticles = 0;
 
-            String tokens[] = header.split(" ");
-
-            int numEntities = Integer.parseInt(tokens[0]);
-            int vlength = Integer.parseInt(tokens[1]);
-            LOG.info("preparing to read " + numEntities + " with length " + vlength + " vectors");
-            int [] colIds = new int[vlength];
-            for (int i = 0; i < vlength; i++) { colIds[i] = i; }
-            int numPhrases = 0;
-            int numArticles = 0;
-
-            for (int i = 0; i < numEntities; i++) {
-                String word = readString(dis);
-                if (i % 5000 == 0) {
-                    LOG.info("Read word vector " + word + " (" + i + " of " + numEntities + ")");
+        while (iter.hasNext()) {
+            Word2VecReader.WordAndVector wv = iter.next();
+            if (wv.isArticle()) {
+                int wpId = wv.getArticleId();
+                if (wpId >= 0) {
+                    DenseMatrixRow row = new DenseMatrixRow(vconf, wpId, colIds, wv.getVector());
+                    articleWriter.writeRow(row);
+                    numArticles++;
                 }
+            } else {
+                String word = wv.getWord().replace('\t', ' ').replace('\n', ' ');
+                DenseMatrixRow row = new DenseMatrixRow(vconf, numPhrases, colIds, wv.getVector());
+                phraseWriter.writeRow(row);
+                phraseIdWriter.write(numPhrases + "\t" + word + "\n");
+                numPhrases++;
+            }
+        }
 
-                float[] vector = new float[vlength];
-                double norm2 = 0.0;
-                for (int j = 0; j < vlength; j++) {
-                    float val = readFloat(dis);
-                    norm2 += val * val;
-                    vector[j] = val;
-                }
-                norm2 = Math.sqrt(norm2);
-
-                for (int j = 0; j < vlength; j++) {
-                    vector[j] /= norm2;
-                }
-                if (word.startsWith("/w/")) {
-                    String[] pieces = word.split("/", 5);
-                    int wpId = Integer.valueOf(pieces[3]);
-                    if (wpId >= 0) {
-                        DenseMatrixRow row = new DenseMatrixRow(vconf, wpId, colIds, vector);
-                        articleWriter.writeRow(row);
-                        numArticles++;
-                    }
-                } else {
-                    word = word.replace('\t', ' ').replace('\n', ' ');
-                    DenseMatrixRow row = new DenseMatrixRow(vconf, numPhrases, colIds, vector);
-                    phraseWriter.writeRow(row);
-                    phraseIdWriter.write(numPhrases + "\t" + word + "\n");
-                    numPhrases++;
-                }
-            }
-            if (numPhrases == 0) {
-                phraseWriter.writeRow(new DenseMatrixRow(vconf, 0, colIds, new float[vlength]));
-            }
-            if (numArticles == 0) {
-                articleWriter.writeRow(new DenseMatrixRow(vconf, 0, colIds, new float[vlength]));
-            }
-        } finally {
-            IOUtils.closeQuietly(bis);
-            IOUtils.closeQuietly(dis);
+        if (numPhrases == 0) {
+            phraseWriter.writeRow(new DenseMatrixRow(vconf, 0, colIds, new float[vlength]));
+        }
+        if (numArticles == 0) {
+            articleWriter.writeRow(new DenseMatrixRow(vconf, 0, colIds, new float[vlength]));
         }
 
         IOUtils.closeQuietly(phraseIdWriter);

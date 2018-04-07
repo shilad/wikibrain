@@ -26,6 +26,7 @@ import org.wikibrain.sr.wikify.WbCorpusLineReader;
 import org.wikibrain.utils.*;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
@@ -378,20 +379,41 @@ public class Word2VecTrainer {
 
 
     public void save(File path) throws IOException {
+        save(path, false);
+    }
+
+    public void save(File path, boolean binary) throws IOException {
         FileUtils.deleteQuietly(path);
         path.getParentFile().mkdirs();
-        OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
-        stream.write((words.length + " " + layer1Size + "\n").getBytes());
-        for (String w : words) {
-            stream.write(w.getBytes("UTF-8"));
-            stream.write(' ');
-            float[] vector = syn0[wordIndexes.get(Word2VecUtils.hashWord(w))];
-            WbMathUtils.normalize(vector);
-            for (float f : vector) {
-                stream.write(floatToBytes(f));
+        if (binary) {
+            OutputStream stream = new BufferedOutputStream(new FileOutputStream(path));
+            stream.write((words.length + " " + layer1Size + "\n").getBytes());
+            for (String w : words) {
+                stream.write(w.getBytes("UTF-8"));
+                stream.write(' ');
+                float[] vector = syn0[wordIndexes.get(Word2VecUtils.hashWord(w))];
+                WbMathUtils.normalize(vector);
+                for (float f : vector) {
+                        stream.write(floatToBytes(f));
+                }
             }
+            stream.close();
+        } else {
+            DecimalFormat formatter = new DecimalFormat("#0.0000");
+            BufferedWriter stream = WpIOUtils.openWriter(path);
+            stream.write(words.length + " " + layer1Size + "\n");
+            for (String w : words) {
+                stream.write(w);
+                float[] vector = syn0[wordIndexes.get(Word2VecUtils.hashWord(w))];
+                WbMathUtils.normalize(vector);
+                for (float f : vector) {
+                    stream.write(' ' + formatter.format((double)f));
+                }
+                stream.write('\n');
+            }
+            stream.close();
+
         }
-        stream.close();
     }
 
     private void test() {
@@ -483,6 +505,11 @@ public class Word2VecTrainer {
                         .withLongOpt("minfreq")
                         .withDescription("minimum word frequency")
                         .create("f"));
+        options.addOption(
+                new DefaultOptionBuilder()
+                        .withLongOpt("binary")
+                        .withDescription("write a binary model")
+                        .create("b"));
 
         EnvBuilder.addStandardOptions(options);
 
@@ -512,6 +539,6 @@ public class Word2VecTrainer {
         }
 
         trainer.train(new File(cmd.getOptionValue("i")));
-        trainer.save(new File(cmd.getOptionValue("o")));
+        trainer.save(new File(cmd.getOptionValue("o")), cmd.hasOption("b"));
     }
 }
