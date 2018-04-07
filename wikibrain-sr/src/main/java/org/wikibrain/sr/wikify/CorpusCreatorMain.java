@@ -31,7 +31,6 @@ public class CorpusCreatorMain {
         options.addOption(
                 new DefaultOptionBuilder()
                         .hasArg()
-                        .isRequired()
                         .withLongOpt("output")
                         .withDescription("corpus output directory (existing data will be overwritten)")
                         .create("o"));
@@ -107,11 +106,12 @@ public class CorpusCreatorMain {
                 System.exit(1);
             }
         }
-        File output = new File(cmd.getOptionValue("output"));
-        if (!output.isDirectory()) {
-            output.mkdirs();
+        if (cmd.hasOption("output")) {
+            corpus.setDirectory(cmd.getOptionValue("output"));
         }
-        corpus.setDirectory(output);
+        if (!corpus.getDirectory().isDirectory()) {
+            corpus.getDictionaryFile().mkdirs();
+        }
         corpus.create();
     }
 }
