@@ -1,26 +1,29 @@
-ssh -i ~/Documents/feb2016-keypair.pem ec2-user@ec2-34-192-219-149.compute-1.amazonaws.com
-
------ Ubuntu -----
+#!/bin/bash
 
 WB_LANG=en
 
 sudo su - 
 
+export DEBIAN_FRONTEND=noninteractive
+
 # Update, etc.
-apt-get update
-apt-get upgrade
-apt-get install unzip zip pigz python3-pip
+apt-get -yq update
+apt-get -yq upgrade
+apt-get -yq install unzip zip pigz python3-pip
 sudo pip3 install cython gensim
 
 # Setup postgres
-apt-get install postgresql postgresql-contrib
+apt-get -yq install postgresql postgresql-contrib
 vim /etc/postgresql/9.5/main/pg_hba.conf # change dd
+
+mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
+
 
 cat >> /etc/postgresql/9.5/main/postgresql.conf  << HERE
 listen_addresses = '*'
-max_connections = 1000         # Must be at least 300
-shared_buffers = 48GB         # Should be 1/4 of system memory
-effective_cache_size = 96GB   # Should be 1/2 of system memory
+max_connections = 1000                    # Must be at least 300
+shared_buffers = $((mem_gb / 4))GB        # Should be 1/4 of system memory
+effective_cache_size = $((mem_gb / 2))GB  # Should be 1/2 of system memory
 fsync = off                 
 synchronous_commit = off    
 max_wal_size = 10GB
@@ -89,7 +92,7 @@ HERE
 mkdir -p /home/ec2-user/wikibrain/base_${WB_LANG}
 
 # Import data 
-export JAVA_OPTS="-d64 -Xmx120000M -server"
+export JAVA_OPTS="-d64 -Xmx$((mem_gb / 3))000M -server"
 ./wb-java.sh org.wikibrain.Loader -l ${WB_LANG} -c wmf_${WB_LANG}.conf
 
 # Make corpus
