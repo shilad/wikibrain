@@ -1,20 +1,20 @@
 #!/bin/bash
 
-WB_LANG=en
-
-sudo su - 
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
 
 export DEBIAN_FRONTEND=noninteractive
 
 # Update, etc.
 apt-get -yq update
 apt-get -yq upgrade
-apt-get -yq install unzip zip pigz python3-pip
+apt-get -yq install unzip zip pigz python3-pip pbzip2
 sudo pip3 install cython gensim
 
 # Setup postgres
 apt-get -yq install postgresql postgresql-contrib
-vim /etc/postgresql/9.5/main/pg_hba.conf # change dd
 
 mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
 
@@ -39,59 +39,12 @@ su postgres -c "psql wikibrain_${WB_LANG} -c CREATE\ USER\ wikibrain\ WITH\ PASS
 
 # Setup java
 add-apt-repository -y ppa:webupd8team/java
-apt-get update -y
+apt-get -yq update
 echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true"  | debconf-set-selections
-apt-get install -y oracle-java8-installer
-apt-get install -y maven
+apt-get -yq install oracle-java8-installer
+apt-get -yq install maven
 
 # Wikibrain setup
 git clone https://github.com/shilad/wikibrain.git
 cd wikibrain/
 git checkout develop
-mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller
-export JAVA_OPTS="-d64 -Xmx$((2 * mem_gb / 5))000M -server"
-cat >./wmf_${WB_LANG}.conf <<HERE
-    baseDir : /home/ec2-user/wikibrain/base_${WB_LANG}
-    dao.dataSource.default : psql
-    dao.dataSource.psql {
-        username : wikibrain
-        password : wikibrain
-        connectionsPerPartition : 5
-        url : "jdbc:postgresql://localhost/wikibrain_${WB_LANG}"
-    }
-sr.metric.local.word2vec2 : \${sr.densevectorbase} {
-        generator : {
-            type : word2vec
-            corpus : wikified
-            modelDir : \${baseDir}"/dat/word2vec2"
-        }
-        reliesOn : [ "prebuiltword2vec" ]
-    }
-
-sr.wikifier.websail2 : {
-            type : websail
-            phraseAnalyzer : anchortext
-            sr : word2vec2
-            identityWikifier : identity
-            localLinkDao : matrix
-            useLinkProbabilityCache : true
-            desiredWikifiedFraction : 0.25
-        }
-
-sr.corpus.wikified2 : {
-            path : \${baseDir}"/dat/corpus/wikified2/"
-            wikifier : websail2
-            rawPageDao : default
-            localPageDao : default
-            phraseAnalyzer : anchortext
-}
-HERE
-mkdir -p /home/ec2-user/wikibrain/base_${WB_LANG}
-
-# Import data 
-export JAVA_OPTS="-d64 -Xmx$((mem_gb / 3))000M -server"
-./wb-java.sh org.wikibrain.Loader -l ${WB_LANG} -c wmf_${WB_LANG}.conf
-
-# Make corpus
-./wb-java.sh org.wikibrain.sr.wikify.CorpusCreatorMain -p wikified2 -o corpus_en -f 0.3 -c wmf_${WB_LANG}.conf
-

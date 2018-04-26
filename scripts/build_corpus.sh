@@ -10,15 +10,19 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-
-mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
+# Parameters that rely on language
 wp_lang=$1
 wp_db=wikibrain_${wp_lang}
 base_dir=`pwd`/base_${wp_lang}
-java_memory=$((mem_gb * 2 / 5))000M
+s3_dir=s3://wikibrain/w2v3/${wp_lang}/
+
+# Parameters that really on amount of memory
+mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
+java_memory=$((mem_gb > 100 ? 40 : mem_gb * 2 / 5))000M
+
+# Parameters that rely on amount of
 num_hyperthreads=$(grep -c ^processor /proc/cpuinfo)
-max_threads=$((num_hyperthreads / 2))
-max_threads=$((max_threads>12?12:max_threads))
+max_threads=$((num_hyperthreads > 24 ? 12 : num_hyperthreads / 2))
 
 export PGPASSWORD=wikibrain
 export JAVA_OPTS="-d64 -Xmx${java_memory} -server"
@@ -59,5 +63,5 @@ mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wiki
 pbzip2 -v ${base_dir}/corpus_w2v/dictionary.txt
 pbzip2 -v ${base_dir}/corpus_w2v/corpus.txt
 
-aws s3 cp ${base_dir}/corpus_w2v/dictionary.txt.bz2 s3://wikibrain/w2v2/${wp_lang}/
-aws s3 cp ${base_dir}/corpus_w2v/corpus.txt.bz2 s3://wikibrain/w2v2/${wp_lang}/
+aws s3 cp ${base_dir}/corpus_w2v/dictionary.txt.bz2 ${s3_dir}
+aws s3 cp ${base_dir}/corpus_w2v/corpus.txt.bz2 ${s3_dir}
