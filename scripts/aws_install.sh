@@ -34,25 +34,22 @@ HERE
 systemctl enable postgresql
 systemctl start postgresql
 
-su - postgres
-createuser -s -r -d -P wikibrain
-createdb wikibrain_${WB_LANG}
-
-exit    # will be root
-exit    # will be ec2-user
+su postgres -c "createdb wikibrain_${WB_LANG}"
+su postgres -c "psql wikibrain_${WB_LANG} -c CREATE\ USER\ wikibrain\ WITH\ PASSWORD\ \'wikibrain\'\ LOGIN;"
 
 # Setup java
-curl -s "https://get.sdkman.io" | bash
-source "/home/ubuntu/.sdkman/bin/sdkman-init.sh"
-sdk install java 8u161-oracle
-sdk install maven
+add-apt-repository -y ppa:webupd8team/java
+apt-get update -y
+echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true"  | debconf-set-selections
+apt-get install -y oracle-java8-installer
+apt-get install -y maven
 
 # Wikibrain setup
 git clone https://github.com/shilad/wikibrain.git
 cd wikibrain/
 git checkout develop
 mvn -f wikibrain-utils/pom.xml clean compile exec:java -Dexec.mainClass=org.wikibrain.utils.ResourceInstaller
-export JAVA_OPTS="-d64 -Xmx120000M -server"
+export JAVA_OPTS="-d64 -Xmx$((2 * mem_gb / 5))000M -server"
 cat >./wmf_${WB_LANG}.conf <<HERE
     baseDir : /home/ec2-user/wikibrain/base_${WB_LANG}
     dao.dataSource.default : psql

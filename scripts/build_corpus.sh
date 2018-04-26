@@ -10,11 +10,15 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
+
+mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
 wp_lang=$1
 wp_db=wikibrain_${wp_lang}
 base_dir=`pwd`/base_${wp_lang}
-java_memory=64000M
-max_threads=10
+java_memory=$((mem_gb * 2 / 5))000M
+num_hyperthreads=$(grep -c ^processor /proc/cpuinfo)
+max_threads=$((num_hyperthreads / 2))
+max_threads=$((max_threads>12?12:max_threads))
 
 export PGPASSWORD=wikibrain
 export JAVA_OPTS="-d64 -Xmx${java_memory} -server"
