@@ -11,7 +11,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -yq update
 apt-get -yq upgrade
 apt-get -yq install unzip zip pigz python3-pip pbzip2
-sudo pip3 install cython gensim
+sudo pip3 install cython gensim awscli
 
 # Setup postgres
 apt-get -yq install postgresql postgresql-contrib
@@ -34,8 +34,7 @@ HERE
 systemctl enable postgresql
 systemctl start postgresql
 
-su postgres -c "createdb wikibrain_${WB_LANG}"
-su postgres -c "psql wikibrain_${WB_LANG} -c CREATE\ USER\ wikibrain\ WITH\ PASSWORD\ \'wikibrain\'\ LOGIN;"
+su postgres -c "psql -c CREATE\ USER\ wikibrain\ WITH\ SUPERUSER\ PASSWORD\ \'wikibrain\'\ LOGIN;"
 
 # Setup java
 add-apt-repository -y ppa:webupd8team/java
