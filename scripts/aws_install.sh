@@ -11,7 +11,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get -yq update
 apt-get -yq upgrade
 apt-get -yq install unzip zip pigz python3-pip pbzip2
-sudo pip3 install cython gensim awscli
 
 # Setup postgres
 apt-get -yq install postgresql postgresql-contrib
@@ -47,3 +46,7 @@ apt-get -yq install maven
 git clone https://github.com/shilad/wikibrain.git
 cd wikibrain/
 git checkout develop
+
+# Do this last, because gensim (at least) requires an internet connection
+# and it could take a bit of time for it to come up
+sudo pip3 install cython gensim awscli

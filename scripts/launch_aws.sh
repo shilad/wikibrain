@@ -4,7 +4,7 @@
 #
 
 if [ $# -ne "1" ]; then
-    echo "usage: $0 lang1,lang2,lang3" >&2
+    echo "usage: $0 lang" >&2
     exit 1
 fi
 
@@ -12,31 +12,62 @@ fi
 set -e
 set -x
 
-wb_langs=$1
+wb_lang=$1
 
-INSTANCE_TYPE=m5.2xlarge
-SECURITY_GROUP=sg-ca3d6c83
-SUBNET=subnet-18171730
+# AWS configuration parameters. These are specific to Shilad's AWS account and should be
+AWS_SUBNET=subnet-18171730
+AWS_AMI_ID=ami-43a15f3e
+AWS_KEYPAIR=feb2016-keypair
+AWS_REGION=us-east-1e
+AWS_SECURITY_GROUP=sg-448c8d32
+
+# Url where the install script for WikiBrain resides.
 INSTALL_URL=https://raw.githubusercontent.com/shilad/wikibrain/develop/scripts/aws_install.sh
 
-
-
-# Process each language
-for wb_lang in $(echo $wb_langs | tr ',' ' '); do
 
 echo "doing language $wb_lang"
 
 cat << EOF >.custom_bootstrap.sh
+#!/usr/bin/env bash
+
 set -e
 set -x
 
 cd /root
-wget $INSTALL_URL
-
+wget $INSTALL_URL -O ./bootstrap.sh
+bash ./bootstrap.sh
+cd ./wikibrain
+./scripts/build_corpus.sh ${wb_lang}
+/sbin/halt
 
 EOF
 
 userdata="$(cat .custom_bootstrap.sh | base64 | tr -d '\n' )"
+
+# Determine parameters for instance type
+
+case $wb_lang in
+    en)
+        INSTANCE_TYPE=m5.4xlarge
+        STORAGE_GBS=400
+        SPOT_MAX=5.00
+        ;;
+    de|fr|es|it|ja|ru|pl|nl|zh|pt)
+        INSTANCE_TYPE=m5.4xlarge
+        STORAGE_GBS=150
+        SPOT_MAX=1.00
+        ;;
+    sv|vi|ceb|war|uk|ca|no|fi|cs|hu|ko|fa|id|tr|ar)
+        INSTANCE_TYPE=m5.2xlarge
+        STORAGE_GBS=50
+        SPOT_MAX=1.00
+        ;;
+    *)
+        INSTANCE_TYPE=m5.2xlarge
+        STORAGE_GBS=20
+        SPOT_MAX=1.00
+        ;;
+esac
 
 
 cat << EOF >.launch_specification.json
@@ -46,7 +77,8 @@ cat << EOF >.launch_specification.json
     {
       "DeviceName": "/dev/xvda",
       "Ebs": {
-        "DeleteOnTermination": true
+        "DeleteOnTermination": true,
+        "VolumeSize" : ${STORAGE_GBS}
       }
     }
   ],
@@ -57,36 +89,33 @@ cat << EOF >.launch_specification.json
       "DeleteOnTermination": true,
       "Description": "",
       "Groups": [
-        "sg-448c8d32"
+        "${AWS_SECURITY_GROUP}"
       ],
-      "SubnetId": "subnet-18171730"
+      "SubnetId": "${AWS_SUBNET}"
     }
   ],
-  "ImageId": "ami-1853ac65",
-  "InstanceType": "INSTANCE_TYPE",
-  "KeyName": "feb2016-keypair",
+  "ImageId": "${AWS_AMI_ID}",
+  "InstanceType": "${INSTANCE_TYPE}",
+  "KeyName": "${AWS_KEYPAIR}",
   "Monitoring": {
     "Enabled": false
   },
   "Placement": {
-    "AvailabilityZone": "us-east-1e",
+    "AvailabilityZone": "${AWS_REGION}",
     "GroupName": "",
     "Tenancy": "default"
   },
   "UserData" : "${userdata}"
+}
 EOF
 
-#    cp -p ./aws/launch_specification.json ./aws/launch_specification_custom.json
-#    sed -i "s/USER_DATA/${userdata}/g" ./aws/launch_specification_custom.json
+# Valid for 10 days
+valid_until=$(date -v '+10d' '+%Y-%m-%dT00:00:00.000Z')
 
-#    aws ec2 request-spot-instances \
-#        --valid-until "2018-05-06T02:52:51.000Z" \
-#        --instance-interruption-behavior terminate \
-#        --type one-time \
-#        --instance-count 1 \
-#        --spot-price "5.00" \
-#        --launch-specification "file://aws/launch_specification_custom.json"
-
-done
-
-
+aws ec2 request-spot-instances \
+        --valid-until "${valid_until}" \
+        --instance-interruption-behavior terminate \
+        --type one-time \
+        --instance-count 1 \
+        --spot-price "${SPOT_MAX}" \
+        --launch-specification "file://.launch_specification.json"
