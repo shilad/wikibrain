@@ -9,9 +9,6 @@ if [ $# -ne "1" ]; then
 fi
 
 
-set -e
-set -x
-
 wb_lang=$1
 
 # AWS configuration parameters. These are specific to Shilad's AWS account and should be
@@ -20,6 +17,7 @@ AWS_AMI_ID=ami-43a15f3e
 AWS_KEYPAIR=feb2016-keypair
 AWS_REGION=us-east-1e
 AWS_SECURITY_GROUP=sg-448c8d32
+AWS_ROLE=arn:aws:iam::798314792140:instance-profile/s3role
 
 # Url where the install script for WikiBrain resides.
 INSTALL_URL=https://raw.githubusercontent.com/shilad/wikibrain/develop/scripts/aws_install.sh
@@ -38,7 +36,7 @@ wget $INSTALL_URL -O ./bootstrap.sh
 bash ./bootstrap.sh
 cd ./wikibrain
 ./scripts/build_corpus.sh ${wb_lang}
-/sbin/halt
+shutdown -h now
 
 EOF
 
@@ -75,7 +73,7 @@ cat << EOF >.launch_specification.json
   "EbsOptimized": true,
   "BlockDeviceMappings": [
     {
-      "DeviceName": "/dev/xvda",
+      "DeviceName": "/dev/sda1",
       "Ebs": {
         "DeleteOnTermination": true,
         "VolumeSize" : ${STORAGE_GBS}
@@ -96,6 +94,9 @@ cat << EOF >.launch_specification.json
   ],
   "ImageId": "${AWS_AMI_ID}",
   "InstanceType": "${INSTANCE_TYPE}",
+  "IamInstanceProfile": {
+      "Arn": "${AWS_ROLE}"
+  },
   "KeyName": "${AWS_KEYPAIR}",
   "Monitoring": {
     "Enabled": false
