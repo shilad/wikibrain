@@ -10,7 +10,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Update, etc.
 apt-get -yq update
 apt-get -yq upgrade
-apt-get -yq install unzip zip pigz python3-pip pbzip2
+apt-get -yq install unzip zip pigz pbzip2
 
 # Setup postgres
 apt-get -yq install postgresql postgresql-contrib
@@ -49,4 +49,6 @@ git checkout develop
 
 # Do this last, because gensim (at least) requires an internet connection
 # and it could take a bit of time for it to come up
-sudo pip3 install cython gensim awscli
+wget https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py
+pip3 install cython awscli

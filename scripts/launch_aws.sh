@@ -31,12 +31,16 @@ cat << EOF >.custom_bootstrap.sh
 set -e
 set -x
 
-cd /root
-wget $INSTALL_URL -O ./bootstrap.sh
-bash ./bootstrap.sh
-cd ./wikibrain
-./scripts/build_corpus.sh ${wb_lang}
-shutdown -h now
+for i in 0 1 2 3; do
+    cd /root
+    wget $INSTALL_URL -O ./bootstrap.sh
+    bash ./bootstrap.sh
+    cd ./wikibrain
+    ./scripts/build_corpus.sh ${wb_lang}
+    if [ -f base_${wb_lang}/corpus_w2v/corpus.txt.bz2 ]; then
+        shutdown -h now
+    fi
+done
 
 EOF
 
@@ -50,12 +54,12 @@ case $wb_lang in
         STORAGE_GBS=400
         SPOT_MAX=5.00
         ;;
-    de|fr|es|it|ja|ru|pl|nl|zh|pt)
+    de|fr|es|it|ja|ru|pl|nl|zh|pt|sr|sv)
         INSTANCE_TYPE=m5.4xlarge
         STORAGE_GBS=150
         SPOT_MAX=1.00
         ;;
-    sv|vi|ceb|war|uk|ca|no|fi|cs|hu|ko|fa|id|tr|ar)
+    vi|ceb|war|uk|ca|no|fi|cs|hu|ko|fa|id|tr|ar)
         INSTANCE_TYPE=m5.2xlarge
         STORAGE_GBS=50
         SPOT_MAX=1.00
