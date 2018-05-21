@@ -60,7 +60,6 @@ public class WpDataSource implements Closeable {
         Connection conn = dataSource.getConnection();
         if (conn.getAutoCommit()) {
             conn.setAutoCommit(false);
-            // Since we're bulk loading, dirty reads are fine. I think....
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         }
         return conn;

@@ -3,6 +3,7 @@ package org.wikibrain.core.dao.sql;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.TableField;
 import org.jooq.tools.jdbc.JDBCUtils;
+import org.postgresql.util.PGobject;
 import org.wikibrain.core.dao.DaoException;
 import org.wikibrain.utils.WpThreadUtils;
 
@@ -131,7 +132,7 @@ public class FastLoader {
 
                 ((org.postgresql.PGConnection) cnx).addDataType(
                         "geometry",
-                        Class.forName("org.postgis.PGgeometry"));
+                        Class.forName("org.postgis.PGgeometry").asSubclass(PGobject.class));
             }catch(ClassNotFoundException e){
                 throw new DaoException("Could not find PostGIS geometry type. " +
                         "Is the PostGIS library in the class path?: " + e.getMessage());
