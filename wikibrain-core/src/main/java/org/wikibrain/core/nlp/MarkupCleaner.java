@@ -11,7 +11,7 @@ public class MarkupCleaner {
 
     private static Pattern PATTERN_REF = Pattern.compile("<ref[^<]*</ref>");
     private static Pattern PATTERN_XHTML = Pattern.compile("<[^>]*>");
-    private static Pattern PATTERN_URL = Pattern.compile("\\[http:[^] ]*");
+    private static Pattern PATTERN_URL = Pattern.compile("\\[http[s]?:[^] ]*");
     private static Pattern PATTERN_THUMB = Pattern.compile("\\|(thumb|left|right|(\\d+px))", Pattern.CASE_INSENSITIVE);
     private static Pattern PATTERN_IMAGE = Pattern.compile("\\[\\[image:[^\\[\\]]*\\|", Pattern.CASE_INSENSITIVE);
     private static Pattern PATTERN_CATEGORIES = Pattern.compile("\\[\\[category:([^|\\]]*)[^]]*\\]\\]");
@@ -19,8 +19,9 @@ public class MarkupCleaner {
     private static Pattern PATTERN_WIKI_URL = Pattern.compile("\\[\\[[^|\\]]*\\|");
     private static Pattern PATTERN_DOUBLE_CURLY = Pattern.compile("\\{\\{[^}]*\\}\\}");
     private static Pattern PATTERN_CURLY = Pattern.compile("\\{[^}]*\\}");
-    private static Pattern PATTERN_URLENC = Pattern.compile("&[^;]*;");
-    private static Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
+    private static Pattern PATTERN_WHITESPACE = Pattern.compile("[^\\S\\n]+");
+    private static Pattern PATTERN_NEWLINES = Pattern.compile("[^\\S\\n]*\n[^\\S\\n]*");
+    private static Pattern PATTERN_NEWLINES2 = Pattern.compile("\n+");
 
     public static String cleanText(String text) {
 
@@ -53,9 +54,6 @@ public class MarkupCleaner {
         // Remove [ and ]
         text = text.replace("[", "");
         text = text.replace("]", "");
-
-        // remove URL encoded chars
-        text = PATTERN_URLENC.matcher(text).replaceAll(" ");
 
         // FastText code:
         //     sed -e "s/’/'/g" -e "s/′/'/g" -e "s/''/ /g" -e "s/'/ ' /g" -e "s/“/\"/g" -e "s/”/\"/g" \
@@ -92,6 +90,8 @@ public class MarkupCleaner {
                 .replaceAll("[0-9]", " ");
 
         text = PATTERN_WHITESPACE.matcher(text).replaceAll(" ");
+        text = PATTERN_NEWLINES.matcher(text).replaceAll("\n");
+        text = PATTERN_NEWLINES2.matcher(text).replaceAll("\n");
 
         return text.trim();
     }

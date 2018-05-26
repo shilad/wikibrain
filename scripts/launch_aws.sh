@@ -28,17 +28,17 @@ echo "doing language $wb_lang"
 cat << EOF >.custom_bootstrap.sh
 #!/usr/bin/env bash
 
-set -e
 set -x
 
 for i in 0 1 2 3; do
-    cd /root
-    wget $INSTALL_URL -O ./bootstrap.sh
-    bash ./bootstrap.sh
-    cd ./wikibrain
+    cd /root &&
+    wget ${INSTALL_URL} -O ./bootstrap.sh &&
+    bash ./bootstrap.sh &&
+    cd ./wikibrain &&
     ./scripts/build_corpus.sh ${wb_lang}
     if [ -f base_${wb_lang}/corpus_w2v/corpus.txt.bz2 ]; then
         shutdown -h now
+        exit 0
     fi
 done
 
