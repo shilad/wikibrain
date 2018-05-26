@@ -14,7 +14,7 @@ fi
 wp_lang=$1
 wp_db=wikibrain_${wp_lang}
 base_dir=`pwd`/base_${wp_lang}
-s3_dir=s3://wikibrain/w2v3/${wp_lang}/
+s3_dir=s3://wikibrain/w2v4/${wp_lang}/
 
 # Parameters that really on amount of memory
 mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
