@@ -9,7 +9,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Update, etc.
 apt-get -yq update
-apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
+apt-get -yq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
 apt-get -yq install unzip zip pigz pbzip2
 
 # Setup postgres
