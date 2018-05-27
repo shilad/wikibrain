@@ -17,8 +17,8 @@ public class MarkupCleaner {
     private static Pattern PATTERN_CATEGORIES = Pattern.compile("\\[\\[category:([^|\\]]*)[^]]*\\]\\]");
     private static Pattern PATTERN_ILL = Pattern.compile("\\[\\[[a-z\\-]*:[^\\]]*\\]\\]/");
     private static Pattern PATTERN_WIKI_URL = Pattern.compile("\\[\\[[^|\\]]*\\|");
-    private static Pattern PATTERN_DOUBLE_CURLY = Pattern.compile("\\{\\{[^}]*\\}\\}");
-    private static Pattern PATTERN_CURLY = Pattern.compile("\\{[^}]*\\}");
+    private static Pattern PATTERN_DOUBLE_CURLY = Pattern.compile("\\{\\{[^}]*+\\}\\}");
+    private static Pattern PATTERN_CURLY = Pattern.compile("\\{[^}]*+\\}");
     private static Pattern PATTERN_WHITESPACE = Pattern.compile("[^\\S\\n]+");
     private static Pattern PATTERN_NEWLINES = Pattern.compile("[^\\S\\n]*\n[^\\S\\n]*");
     private static Pattern PATTERN_NEWLINES2 = Pattern.compile("\n+");
