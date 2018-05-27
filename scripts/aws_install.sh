@@ -9,11 +9,11 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Update, etc.
 apt-get -yq update
-apt-get -yq upgrade
+apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
 apt-get -yq install unzip zip pigz pbzip2
 
 # Setup postgres
-apt-get -yq install postgresql postgresql-contrib
+apt-get install -yq postgresql postgresql-contrib
 
 mem_gb=$(free -h | gawk '/Mem:/{print $2}' | rev | cut -c 2- | rev)
 
